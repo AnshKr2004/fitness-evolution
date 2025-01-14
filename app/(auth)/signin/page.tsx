@@ -43,7 +43,7 @@ export default function SignIn() {
       <div className="w-full max-w-md p-8 rounded-lg bg-[#12143a] text-white">
         <h1 className="text-2xl font-bold text-center mb-2">Sign In</h1>
         <p className="text-center text-gray-400 mb-6">Sign in to your account</p>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm mb-2">Email Address</label>
@@ -96,7 +96,7 @@ export default function SignIn() {
         </form>
 
         <p className="text-center mt-6 text-sm text-gray-400">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/signup" className="text-blue-500 hover:underline">
             Sign up
           </Link>

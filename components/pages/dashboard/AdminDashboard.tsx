@@ -1,36 +1,36 @@
 import { Users, Dumbbell, Calendar, MessageSquare } from 'lucide-react'
-import { StatsCard } from "./components/stats-card"
+import { UnifiedStatCard } from "@/components/pages/components/unified-stat-card"
 import { ActivityChart } from "./components/activity-chart"
 import { DistributionChart } from "./components/distribution-chart"
 
 export default function DashboardPage() {
   return (
-    <div className="min-h-screen">
-      <main className="ml-64 p-4 pt-7">
+    <div className="space-y-6 p-6 lg:ml-64">
+      <main className="p-4 pt-7">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StatsCard
-            icon={<Users className="h-8 w-8 text-white" />}
+          <UnifiedStatCard
+            icon={Users}
             title="Total Users"
             value="2,543"
-            className="bg-blue-500"
+            className="bg-blue-600 dark:bg-blue-700"
           />
-          <StatsCard
-            icon={<Dumbbell className="h-8 w-8 text-white" />}
+          <UnifiedStatCard
+            icon={Dumbbell}
             title="Active Trainers"
             value="48"
-            className="bg-green-500"
+            className="bg-green-600 dark:bg-green-700"
           />
-          <StatsCard
-            icon={<Calendar className="h-8 w-8 text-white" />}
+          <UnifiedStatCard
+            icon={Calendar}
             title="Pending Sessions"
             value="156"
-            className="bg-orange-500"
+            className="bg-amber-600 dark:bg-amber-700"
           />
-          <StatsCard
-            icon={<MessageSquare className="h-8 w-8 text-white" />}
+          <UnifiedStatCard
+            icon={MessageSquare}
             title="Active Posts"
             value="892"
-            className="bg-pink-500"
+            className="bg-pink-600 dark:bg-pink-700"
           />
         </div>
 

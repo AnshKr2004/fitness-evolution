@@ -31,7 +31,7 @@ export function ProgressItem({ name, goal, progress, onUpdateProgress }: Progres
         <Button 
           variant="outline" 
           size="sm" 
-          className="text-blue-600"
+          className="bg-[#888BF4] text-white"
           onClick={onUpdateProgress}
         >
           Update Progress

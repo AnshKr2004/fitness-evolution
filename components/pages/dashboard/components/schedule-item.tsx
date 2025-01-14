@@ -30,7 +30,7 @@ export function ScheduleItem({ name, time, type, status }: ScheduleItemProps) {
         <Badge variant="secondary" className={statusColors[status]}>
           {status.charAt(0).toUpperCase() + status.slice(1)}
         </Badge>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="bg-blue-500 text-white">
           Join Meet
         </Button>
       </div>

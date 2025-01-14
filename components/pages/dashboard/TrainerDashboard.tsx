@@ -17,7 +17,7 @@ export default function TrainerDashboard() {
   }
 
   return (
-    <div className="min-h-screen ml-64 bg-gray-50 p-4 md:p-6">
+    <div className="space-y-6 p-6 lg:ml-64">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Stats Grid */}
         <div className="grid gap-4 md:grid-cols-3">
@@ -38,7 +38,7 @@ export default function TrainerDashboard() {
         <div className="grid gap-6 md:grid-cols-2">
           {/* Schedule Section */}
           <div className="bg-white rounded-lg shadow">
-            <h2 className="p-4 font-medium border-b">Today's Schedule</h2>
+            <h2 className="p-4 font-medium border-b">Today&apos;s Schedule</h2>
             <div>
               <ScheduleItem
                 name="Emma Davis"
