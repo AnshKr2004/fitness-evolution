@@ -7,17 +7,28 @@ declare module "next-auth" {
       name?: string | null
       email?: string | null
       image?: string | null
-      role: "ADMIN" | "TRAINER"
+      role: "ADMIN" | "TRAINER" | "USER"
+      fullName?: string | null
+      gender?: "MALE" | "FEMALE" | null
+      birthDate?: Date | null
     }
   }
 
   interface User {
-    role: "ADMIN" | "TRAINER"
+    id: string
+    role: "ADMIN" | "TRAINER" | "USER"
+    fullName?: string | null
+    gender?: "MALE" | "FEMALE" | null
+    birthDate?: Date | null
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    role: "ADMIN" | "TRAINER"
+    id: string
+    role: "ADMIN" | "TRAINER" | "USER"
+    fullName?: string | null
+    gender?: "MALE" | "FEMALE" | null
+    birthDate?: Date | null
   }
 }

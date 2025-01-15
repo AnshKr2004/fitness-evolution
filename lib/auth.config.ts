@@ -23,9 +23,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email
-          }
+          where: { email: credentials.email }
         })
 
         if (!user || !user?.password) {
@@ -56,20 +54,26 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.id = user.id
         token.role = user.role
+        token.fullName = user.fullName
+        token.gender = user.gender
+        token.birthDate = user.birthDate
       }
       return token
     },
     async session({ session, token }) {
       if (session?.user) {
-        session.user.role = token.role as "ADMIN" | "TRAINER"
+        session.user.id = token.id as string
+        session.user.role = token.role
+        session.user.fullName = token.fullName as string | undefined
+        session.user.gender = token.gender as "MALE" | "FEMALE" | undefined
+        session.user.birthDate = token.birthDate as Date | undefined
       }
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Allows relative callback URLs
       if (url.startsWith("/")) return `${baseUrl}${url}`
-      // Allows callback URLs on the same origin
       else if (new URL(url).origin === baseUrl) return url
       return baseUrl
     }

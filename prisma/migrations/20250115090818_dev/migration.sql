@@ -1,5 +1,8 @@
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('ADMIN', 'TRAINER');
+CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN', 'TRAINER');
+
+-- CreateEnum
+CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -9,7 +12,10 @@ CREATE TABLE "User" (
     "password" TEXT,
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
-    "role" "Role" NOT NULL DEFAULT 'TRAINER',
+    "role" "Role" NOT NULL DEFAULT 'USER',
+    "fullName" TEXT,
+    "gender" "Gender",
+    "birthDate" TIMESTAMP(3),
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -33,6 +39,24 @@ CREATE TABLE "Account" (
 );
 
 -- CreateTable
+CREATE TABLE "Schedule" (
+    "id" TEXT NOT NULL,
+    "date" TIMESTAMP(3) NOT NULL,
+    "startTime" TIMESTAMP(3) NOT NULL,
+    "endTime" TIMESTAMP(3) NOT NULL,
+    "scheduleLink" TEXT,
+    "scheduleSubject" TEXT NOT NULL,
+    "scheduleDescription" TEXT,
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "userId" TEXT NOT NULL,
+    "trainerId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Schedule_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Session" (
     "id" TEXT NOT NULL,
     "sessionToken" TEXT NOT NULL,
@@ -49,10 +73,22 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 CREATE UNIQUE INDEX "Account_provider_providerAccountId_key" ON "Account"("provider", "providerAccountId");
 
 -- CreateIndex
+CREATE INDEX "Schedule_userId_idx" ON "Schedule"("userId");
+
+-- CreateIndex
+CREATE INDEX "Schedule_trainerId_idx" ON "Schedule"("trainerId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Schedule" ADD CONSTRAINT "Schedule_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Schedule" ADD CONSTRAINT "Schedule_trainerId_fkey" FOREIGN KEY ("trainerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

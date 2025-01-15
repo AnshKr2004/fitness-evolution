@@ -17,9 +17,14 @@ model User {
   password      String?
   emailVerified DateTime?
   image         String?
-  role          Role      @default(TRAINER)
+  role          Role      @default(USER)
+  fullName      String?
+  gender        Gender?
+  birthDate     DateTime?
   accounts      Account[]
   sessions      Session[]
+  userSchedules      Schedule[] @relation("UserSchedules")
+  trainerSchedules   Schedule[] @relation("TrainerSchedules")
 }
 
 model Account {
@@ -41,6 +46,26 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
+model Schedule {
+  id                  String    @id @default(cuid())
+  date                DateTime
+  startTime           DateTime
+  endTime             DateTime
+  scheduleLink        String?
+  scheduleSubject     String
+  scheduleDescription String?
+  status              String    @default("pending")
+  userId              String
+  trainerId           String
+  user                User      @relation("UserSchedules", fields: [userId], references: [id])
+  trainer             User      @relation("TrainerSchedules", fields: [trainerId], references: [id])
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([trainerId])
+}
+
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
@@ -50,6 +75,12 @@ model Session {
 }
 
 enum Role {
+  USER
   ADMIN
   TRAINER
+}
+
+enum Gender {
+  MALE
+  FEMALE
 }

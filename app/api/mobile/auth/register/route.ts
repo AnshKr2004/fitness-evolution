@@ -1,0 +1,58 @@
+import { PrismaClient } from "@prisma/client"
+import { NextResponse } from "next/server"
+import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken"
+
+const prisma = new PrismaClient()
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+    const { email, password, fullName } = body
+
+    if (!email || !password || !fullName) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      )
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    })
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "Email already exists" },
+        { status: 400 }
+      )
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+    
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        fullName,
+        role: "USER"
+      }
+    })
+
+    const token = jwt.sign(
+      { 
+        id: user.id,
+        email: user.email,
+        role: user.role
+      },
+      process.env.NEXTAUTH_SECRET!
+    )
+
+    return NextResponse.json({ user, token }, { status: 201 })
+  } catch (error) {
+    return NextResponse.json(
+      { error: error },
+      { status: 500 }
+    )
+  }
+}
