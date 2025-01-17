@@ -11,18 +11,20 @@ generator client {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  password      String?
-  emailVerified DateTime?
-  image         String?
-  role          Role      @default(USER)
-  fullName      String?
-  gender        Gender?
-  birthDate     DateTime?
-  accounts      Account[]
-  sessions      Session[]
+  id                 String     @id @default(cuid())
+  email              String?    @unique
+  password           String?
+  emailVerified      DateTime?
+  image              String?
+  role               Role       @default(TRAINER)
+  name               String?
+  gender             Gender?
+  birthDate          DateTime?
+  bio                String?
+  emailNotifications Boolean    @default(true)
+  smsNotifications   Boolean    @default(false)
+  accounts           Account[]
+  sessions           Session[]
   userSchedules      Schedule[] @relation("UserSchedules")
   trainerSchedules   Schedule[] @relation("TrainerSchedules")
 }
@@ -47,20 +49,20 @@ model Account {
 }
 
 model Schedule {
-  id                  String    @id @default(cuid())
+  id                  String   @id @default(cuid())
   date                DateTime
   startTime           DateTime
   endTime             DateTime
   scheduleLink        String?
   scheduleSubject     String
   scheduleDescription String?
-  status              String    @default("pending")
+  status              String   @default("pending")
   userId              String
   trainerId           String
-  user                User      @relation("UserSchedules", fields: [userId], references: [id])
-  trainer             User      @relation("TrainerSchedules", fields: [trainerId], references: [id])
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  user                User     @relation("UserSchedules", fields: [userId], references: [id])
+  trainer             User     @relation("TrainerSchedules", fields: [trainerId], references: [id])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   @@index([userId])
   @@index([trainerId])

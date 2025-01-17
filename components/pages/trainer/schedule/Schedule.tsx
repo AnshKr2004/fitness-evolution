@@ -1,51 +1,126 @@
 "use client"
 
-import { useState } from "react"
-import { ScheduleItem } from "@/types/schedule"
+import { useState, useEffect } from "react"
+import { Schedule } from "@/types/schedule"
 import { TodaysSchedule } from "./components/todays-schedule"
 import { WeeklySchedule } from "./components/weekly-schedule"
+import { EditScheduleModal } from "./components/edit-schedule-modal"
+import { DeleteScheduleModal } from "./components/delete-schedule-modal"
+import { AddClassModal } from "./components/add-class-modal"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+import { toast } from "sonner"
 
-const initialTodaySchedule: ScheduleItem[] = [
-  {
-    title: "Yoga Basics",
-    startTime: "7:00 AM",
-    endTime: "8:00 AM",
-  },
-  {
-    title: "HIIT Training",
-    startTime: "8:30 AM",
-    endTime: "9:30 AM",
-  },
-]
-
-const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-const initialWeeklySchedule = weekDays.map((day) => ({
-  date: day,
-  events:
-    day === "Mon"
-      ? [{ title: "Yoga", time: "7:00 AM", type: "yoga" as const }]
-      : day === "Tue"
-      ? [{ title: "HIIT", time: "8:30 AM", type: "hiit" as const }]
-      : [],
-}))
+interface User {
+  id: string;
+  name: string;
+}
 
 export default function SchedulePage() {
-  const [todaySchedule, setTodaySchedule] = useState(initialTodaySchedule)
-  const weeklySchedule = initialWeeklySchedule
+  const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null)
+  const [deletingSchedule, setDeletingSchedule] = useState<Schedule | null>(null)
+  const [isAddClassModalOpen, setIsAddClassModalOpen] = useState(false)
+  const [users, setUsers] = useState<User[]>([])
 
-  const handleEdit = (item: ScheduleItem) => {
-    // Implement edit functionality
-    console.log("Edit:", item)
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const response = await fetch('/api/users/user')
+      const data = await response.json()
+      setUsers(data.users)
+    }
+    fetchUsers()
+  }, [])
+
+  const handleEdit = (item: Schedule) => {
+    setEditingSchedule(item)
   }
 
-  const handleDelete = (item: ScheduleItem) => {
-    setTodaySchedule((prev) => prev.filter((i) => i !== item))
+  const handleDelete = (item: Schedule) => {
+    setDeletingSchedule(item)
+  }
+
+  const handleSaveEdit = async (updatedSchedule: Partial<Schedule>) => {
+    if (editingSchedule) {
+      try {
+        const response = await fetch(`/api/schedule/${editingSchedule.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedSchedule),
+        })
+        if (response.ok) {
+          toast.success("Schedule updated successfully")
+          // Refresh the schedules
+          window.location.reload()
+        } else {
+          toast.error("Failed to update schedule")
+        }
+      } catch (error) {
+        console.error('Error updating schedule:', error)
+        toast.error("An error occurred while updating the schedule")
+      }
+    }
+    setEditingSchedule(null)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (deletingSchedule) {
+      try {
+        const response = await fetch(`/api/schedule/${deletingSchedule.id}`, {
+          method: 'DELETE',
+        })
+        if (response.ok) {
+          toast.success("Schedule deleted successfully")
+          // Refresh the schedules
+          window.location.reload()
+        } else {
+          toast.error("Failed to delete schedule")
+        }
+      } catch (error) {
+        console.error('Error deleting schedule:', error)
+        toast.error("An error occurred while deleting the schedule")
+      }
+    }
+    setDeletingSchedule(null)
   }
 
   const handleAddClass = () => {
-    // Implement add class functionality
-    console.log("Add class")
+    setIsAddClassModalOpen(true)
+  }
+
+  const handleSaveNewClass = async (newClass: {
+    date: string;
+    startTime: string;
+    endTime: string;
+    scheduleSubject: string;
+    scheduleDescription: string;
+    userId: string;
+  }) => {
+    try {
+      const response = await fetch('/api/schedule/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...newClass,
+          date: new Date(newClass.date).toISOString(),
+          startTime: new Date(newClass.startTime).toISOString(),
+          endTime: new Date(newClass.endTime).toISOString(),
+        }),
+      })
+      if (response.ok) {
+        toast.success("New class added successfully")
+        // Refresh the schedules
+        window.location.reload()
+      } else {
+        toast.error("Failed to add new class")
+      }
+    } catch (error) {
+      console.error('Error adding new class:', error)
+      toast.error("An error occurred while adding the new class")
+    }
+    setIsAddClassModalOpen(false)
   }
 
   const handleExport = () => {
@@ -57,14 +132,12 @@ export default function SchedulePage() {
     <div className="space-y-6 p-2 lg:ml-64">
       <div className="h-full px-4 py-6 lg:px-8">
         <TodaysSchedule
-          items={todaySchedule}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
         <ScrollArea className="w-full">
           <div className="pr-4">
             <WeeklySchedule
-              days={weeklySchedule}
               onAddClass={handleAddClass}
               onExport={handleExport}
             />
@@ -72,6 +145,24 @@ export default function SchedulePage() {
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </div>
+      <EditScheduleModal
+        schedule={editingSchedule}
+        isOpen={!!editingSchedule}
+        onClose={() => setEditingSchedule(null)}
+        onSave={handleSaveEdit}
+      />
+      <DeleteScheduleModal
+        schedule={deletingSchedule}
+        isOpen={!!deletingSchedule}
+        onClose={() => setDeletingSchedule(null)}
+        onConfirm={handleConfirmDelete}
+      />
+      <AddClassModal
+        isOpen={isAddClassModalOpen}
+        onClose={() => setIsAddClassModalOpen(false)}
+        onSave={handleSaveNewClass}
+        users={users}
+      />
     </div>
   )
 }

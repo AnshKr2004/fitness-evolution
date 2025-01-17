@@ -56,9 +56,12 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id
         token.role = user.role
-        token.fullName = user.fullName
+        token.name = user.name
         token.gender = user.gender
         token.birthDate = user.birthDate
+        token.bio = user.bio
+        token.emailNotifications = user.emailNotifications
+        token.smsNotifications = user.smsNotifications
       }
       return token
     },
@@ -66,9 +69,12 @@ export const authOptions: NextAuthOptions = {
       if (session?.user) {
         session.user.id = token.id as string
         session.user.role = token.role
-        session.user.fullName = token.fullName as string | undefined
+        session.user.name = token.name as string
         session.user.gender = token.gender as "MALE" | "FEMALE" | undefined
         session.user.birthDate = token.birthDate as Date | undefined
+        session.user.bio = token.bio as string | undefined
+        session.user.emailNotifications = token.emailNotifications as boolean
+        session.user.smsNotifications = token.smsNotifications as boolean
       }
       return session
     },

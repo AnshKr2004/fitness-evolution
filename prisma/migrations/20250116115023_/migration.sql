@@ -7,15 +7,17 @@ CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE');
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
-    "name" TEXT,
     "email" TEXT,
     "password" TEXT,
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
-    "role" "Role" NOT NULL DEFAULT 'USER',
-    "fullName" TEXT,
+    "role" "Role" NOT NULL DEFAULT 'TRAINER',
+    "name" TEXT,
     "gender" "Gender",
     "birthDate" TIMESTAMP(3),
+    "bio" TEXT,
+    "emailNotifications" BOOLEAN NOT NULL DEFAULT true,
+    "smsNotifications" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );

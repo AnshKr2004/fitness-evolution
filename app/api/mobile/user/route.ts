@@ -56,17 +56,17 @@ export async function PUT(request: Request) {
 
     const decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET!) as JwtPayload & { id: string }
     const body = await request.json()
-    const { fullName, gender, profileImage, birthDate, email, password } = body
+    const { name, gender, profileImage, birthDate, email, password } = body
 
     const updateData: {
-      fullName?: string;
+      name?: string;
       gender?: Gender;
       image?: string;
       birthDate?: Date | null;
       email?: string;
       password?: string;
     } = {}
-    if (fullName !== undefined) updateData.fullName = fullName
+    if (name !== undefined) updateData.name = name
     if (gender !== undefined) {
       if (gender === "MALE" || gender === "FEMALE") {
         updateData.gender = gender as Gender

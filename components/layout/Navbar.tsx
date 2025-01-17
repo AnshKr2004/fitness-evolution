@@ -1,11 +1,30 @@
 "use client"
 
-import { useState } from 'react'
-import { Search, Menu, X } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Search, Menu, X, ChevronDown } from 'lucide-react'
 import Image from "next/image"
+import { useSession, signOut } from 'next-auth/react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { data: session } = useSession()
+  const [userImage, setUserImage] = useState("/pfp.jpg")
+
+  useEffect(() => {
+    if (session?.user?.image) {
+      setUserImage(session.user.image)
+    }
+  }, [session])
+
+  const handleSignOut = () => {
+    signOut({ callbackUrl: '/signin' })
+  }
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-gray-700 bg-black px-4 py-2.5">
@@ -41,14 +60,24 @@ export function Navbar() {
           </div>
           
           <div className="hidden items-center gap-2 sm:flex">
-            <Image
-              src="/pfp.jpg"
-              alt="Profile picture"
-              width={32}
-              height={32}
-              className="rounded-full"
-            />
-            <span className="hidden text-sm font-medium text-white md:block">Vikram Khatkar</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-2">
+                <Image
+                  src={userImage || "/placeholder.svg"}
+                  alt="Profile picture"
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                />
+                <span className="hidden text-sm font-medium text-white md:block">{session?.user?.name || 'User'}</span>
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className='bg-black'>
+                <DropdownMenuItem onClick={handleSignOut} className='bg-red-600 py-2 text-white hover:bg-red-700 focus:bg-red-700 focus:text-white cursor-pointer'>
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <button
@@ -75,22 +104,30 @@ export function Navbar() {
               />
             </div>
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Image
-                src="/pfp.jpg"
-                alt="Profile picture"
-                width={32}
-                height={32}
-                className="rounded-full"
-              />
-              <span className="text-sm font-medium text-white">Vikram Khatkar</span>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Image
+                  src={userImage || "/placeholder.svg"}
+                  alt="Profile picture"
+                  width={32}
+                  height={32}
+                  className="rounded-full"
+                />
+                <span className="text-sm font-medium text-white">{session?.user?.name || 'User'}</span>
+              </div>
+              <button className="rounded-full bg-gray-800 p-2 text-gray-400 hover:text-white">
+                <span className="sr-only">View notifications</span>
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+              </button>
             </div>
-            <button className="rounded-full bg-gray-800 p-2 text-gray-400 hover:text-white">
-              <span className="sr-only">View notifications</span>
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
+            <button
+              onClick={handleSignOut}
+              className="w-full rounded-lg bg-red-600 py-2 text-white hover:bg-red-700"
+            >
+              Sign out
             </button>
           </div>
         </div>

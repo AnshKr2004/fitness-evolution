@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       include: {
         user: {
           select: {
-            fullName: true,
+            name: true,
             ...(decoded.role === "TRAINER" && {
               gender: true,
               birthDate: true
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
         },
         trainer: {
           select: {
-            fullName: true
+            name: true
           }
         }
       }

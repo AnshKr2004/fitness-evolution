@@ -4,6 +4,8 @@ import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
+import { useSession } from "next-auth/react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -26,7 +28,7 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 
 const formSchema = z.object({
-  fullName: z.string().min(2, {
+  name: z.string().min(2, {
     message: "Full name must be at least 2 characters.",
   }),
   email: z.string().email({
@@ -39,11 +41,16 @@ const formSchema = z.object({
   newPassword: z.string().optional(),
 })
 
+type FormValues = z.infer<typeof formSchema>
+
 export default function SettingsPage() {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const { data: session, update } = useSession()
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [hasPassword, setHasPassword] = React.useState(false)
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: "",
+      name: "",
       email: "",
       bio: "",
       emailNotifications: true,
@@ -53,8 +60,84 @@ export default function SettingsPage() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+  React.useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const response = await fetch('/api/user/details')
+        if (response.ok) {
+          const userData = await response.json()
+          form.reset({
+            name: userData.name || "",
+            email: userData.email || "",
+            bio: userData.bio || "",
+            emailNotifications: userData.emailNotifications || false,
+            smsNotifications: userData.smsNotifications || false,
+            currentPassword: "",
+            newPassword: "",
+          })
+          setHasPassword(!!userData.password)
+        } else {
+          throw new Error('Failed to fetch user details')
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error)
+        toast.error("Failed to load user details. Please try again.")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchUserDetails()
+  }, [form])
+
+  async function onSubmit(values: FormValues) {
+    try {
+      const updateData = { ...values }
+      if (!hasPassword) {
+        delete updateData.currentPassword
+      } else if (!updateData.newPassword) {
+        delete updateData.currentPassword
+        delete updateData.newPassword
+      }
+
+      const response = await fetch('/api/user/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      })
+
+      if (response.ok) {
+        const updatedUser = await response.json()
+        await update({
+          ...session,
+          user: {
+            ...session?.user,
+            ...updatedUser,
+          },
+        })
+        toast.success("Your settings have been updated successfully.")
+        if (values.newPassword) {
+          setHasPassword(true)
+        }
+        form.reset({
+          ...values,
+          currentPassword: "",
+          newPassword: "",
+        })
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update settings')
+      }
+    } catch (error) {
+      console.error('Error updating settings:', error)
+      toast.error(error instanceof Error ? error.message : "Failed to update settings. Please try again.")
+    }
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>
   }
 
   return (
@@ -72,7 +155,7 @@ export default function SettingsPage() {
                 <div className="grid gap-6 md:grid-cols-2">
                   <FormField
                     control={form.control}
-                    name="fullName"
+                    name="name"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Full Name</FormLabel>
@@ -163,38 +246,59 @@ export default function SettingsPage() {
               <div className="space-y-6">
                 <h3 className="text-lg font-medium">Security</h3>
                 <div className="grid gap-6 md:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="currentPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Current Password</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="password" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="newPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>New Password</FormLabel>
-                        <FormControl>
-                          <Input {...field} type="password" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {hasPassword ? (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name="currentPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Current Password</FormLabel>
+                            <FormControl>
+                              <Input {...field} type="password" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="newPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>New Password</FormLabel>
+                            <FormControl>
+                              <Input {...field} type="password" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  ) : (
+                    <FormField
+                      control={form.control}
+                      name="newPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Set Password</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="password" />
+                          </FormControl>
+                          <FormDescription>
+                            Set a password for your account
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div className="flex justify-end gap-4">
-                <Button variant="outline" type="button">
+                <Button variant="outline" type="button" onClick={() => form.reset()}>
                   Cancel
                 </Button>
                 <Button type="submit">Save Changes</Button>
