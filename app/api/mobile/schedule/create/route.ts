@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ schedule }, { status: 201 })
   } catch (error) {
+    console.error("Schedule creation error:", error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "An unknown error occurred" },
       { status: 500 },

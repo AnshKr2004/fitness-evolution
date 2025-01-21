@@ -1,41 +1,45 @@
-import { authMiddleware } from "@/middleware";
-import { PrismaClient } from "@prisma/client";
-import { JwtPayload } from "jsonwebtoken";
-import { NextRequest, NextResponse } from "next/server";
+import { authMiddleware } from "@/middleware"
+import { PrismaClient } from "@prisma/client"
+import type { JwtPayload } from "jsonwebtoken"
+import { type NextRequest, NextResponse } from "next/server"
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
 export async function GET(request: NextRequest) {
   try {
     const decoded = (await authMiddleware(request)) as JwtPayload & {
-      role: string;
-    };
+      id: string
+      role: string
+    }
 
     const upcomingSchedules = await prisma.schedule.findMany({
       where: {
-        OR: [{ userId: decoded.id }, { trainerId: decoded.id }],
+        userId: decoded.id,
         status: "upcoming",
-      },
-      include: {
-        user: {
-          select: {
-            name: true,
-            ...(decoded.role === "TRAINER" && {
-              gender: true,
-              birthDate: true,
-            }),
-          },
+        date: {
+          gte: new Date(),
         },
+      },
+      select: {
+        id: true,
+        date: true,
+        startTime: true,
+        scheduleLink: true,
+        scheduleSubject: true,
         trainer: {
           select: {
             name: true,
           },
         },
       },
-    });
+      orderBy: {
+        startTime: "asc",
+      },
+    })
 
-    return NextResponse.json({ schedules: upcomingSchedules });
+    return NextResponse.json({ schedules: upcomingSchedules })
   } catch (error) {
-    return NextResponse.json({ error: error }, { status: 500 });
+    console.error("Error fetching upcoming schedules:", error)
+    return NextResponse.json({ error: "Failed to fetch upcoming schedules" }, { status: 500 })
   }
 }

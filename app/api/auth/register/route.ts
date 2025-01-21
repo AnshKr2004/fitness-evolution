@@ -20,7 +20,7 @@ export async function POST(request: Request) {
         email,
         name,
         password: hashedPassword,
-        specialization,
+        specialization: specialization ? specialization : '',
         role: "TRAINER",
         status: "ACTIVE",
         clientsCount: 0
