@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -30,12 +31,19 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 
 const formSchema = z.object({
-  sessionId: z.string().min(1, "Session ID is required"),
-  trainer: z.string().min(1, "Trainer selection is required"),
-  dateTime: z.string().min(1, "Date and time is required"),
-  sessionType: z.string().min(1, "Session type is required"),
-  notes: z.string(),
+  scheduleSubject: z.string().min(1, "Schedule subject is required"),
+  trainerId: z.string().min(1, "Trainer selection is required"),
+  userId: z.string().min(1, "Client selection is required"),
+  date: z.string().min(1, "Date is required"),
+  startTime: z.string().min(1, "Start time is required"),
+  endTime: z.string().min(1, "End time is required"),
+  scheduleDescription: z.string().optional(),
 })
+
+interface User {
+  id: string
+  name: string
+}
 
 interface AssignSessionModalProps {
   open: boolean
@@ -48,16 +56,46 @@ export function AssignSessionModal({
   onOpenChange,
   onSubmit,
 }: AssignSessionModalProps) {
+  const [trainers, setTrainers] = useState<User[]>([])
+  const [clients, setClients] = useState<User[]>([])
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      sessionId: "",
-      trainer: "",
-      dateTime: "",
-      sessionType: "",
-      notes: "",
+      scheduleSubject: "",
+      trainerId: "",
+      userId: "",
+      date: "",
+      startTime: "",
+      endTime: "",
+      scheduleDescription: "",
     },
   })
+
+  useEffect(() => {
+    fetchTrainers()
+    fetchClients()
+  }, [])
+
+  const fetchTrainers = async () => {
+    try {
+      const response = await fetch('/api/users/trainers')
+      const data = await response.json()
+      setTrainers(data)
+    } catch (error) {
+      console.error('Error fetching trainers:', error)
+    }
+  }
+
+  const fetchClients = async () => {
+    try {
+      const response = await fetch('/api/users/clients')
+      const data = await response.json()
+      setClients(data)
+    } catch (error) {
+      console.error('Error fetching clients:', error)
+    }
+  }
 
   function handleSubmit(values: z.infer<typeof formSchema>) {
     onSubmit(values)
@@ -75,12 +113,12 @@ export function AssignSessionModal({
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="sessionId"
+              name="scheduleSubject"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Session ID</FormLabel>
+                  <FormLabel>Schedule Subject</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter session ID" {...field} />
+                    <Input placeholder="Enter schedule subject" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -88,7 +126,7 @@ export function AssignSessionModal({
             />
             <FormField
               control={form.control}
-              name="trainer"
+              name="trainerId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Select Trainer</FormLabel>
@@ -99,8 +137,11 @@ export function AssignSessionModal({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="mike">Mike Johnson</SelectItem>
-                      <SelectItem value="sarah">Sarah Williams</SelectItem>
+                      {trainers.map((trainer) => (
+                        <SelectItem key={trainer.id} value={trainer.id}>
+                          {trainer.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -109,12 +150,36 @@ export function AssignSessionModal({
             />
             <FormField
               control={form.control}
-              name="dateTime"
+              name="userId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Date & Time</FormLabel>
+                  <FormLabel>Select Client</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a client" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {clients.map((client) => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date</FormLabel>
                   <FormControl>
-                    <Input type="datetime-local" {...field} />
+                    <Input type="date" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -122,29 +187,33 @@ export function AssignSessionModal({
             />
             <FormField
               control={form.control}
-              name="sessionType"
+              name="startTime"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Session Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a session type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="strength">Strength Training</SelectItem>
-                      <SelectItem value="yoga">Yoga</SelectItem>
-                      <SelectItem value="cardio">Cardio</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Start Time</FormLabel>
+                  <FormControl>
+                    <Input type="time" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
-              name="notes"
+              name="endTime"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>End Time</FormLabel>
+                  <FormControl>
+                    <Input type="time" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="scheduleDescription"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Notes</FormLabel>
@@ -163,7 +232,7 @@ export function AssignSessionModal({
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit" className="bg-blue-600 dark:bg-blue-700">Assign Session</Button>
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700">Assign Session</Button>
             </DialogFooter>
           </form>
         </Form>

@@ -8,51 +8,44 @@ const prisma = new PrismaClient()
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { email, password, name } = body
+    const { email, password, name, membership } = body
 
     if (!email || !password || !name) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     })
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: "Email already exists" },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: "Email already exists" }, { status: 400 })
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)
-    
+
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name,
-        role: "USER"
-      }
+        role: "USER",
+        membership: membership ? (membership.toUpperCase() as "BASIC" | "PREMIUM") : null,
+        status: membership ? "ACTIVE" : "INACTIVE",
+      },
     })
 
     const token = jwt.sign(
-      { 
+      {
         id: user.id,
         email: user.email,
-        role: user.role
+        role: user.role,
       },
-      process.env.NEXTAUTH_SECRET!
+      process.env.NEXTAUTH_SECRET!,
     )
 
     return NextResponse.json({ user, token }, { status: 201 })
   } catch (error) {
-    return NextResponse.json(
-      { error: error },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: error }, { status: 500 })
   }
 }

@@ -11,22 +11,28 @@ generator client {
 }
 
 model User {
-  id                 String     @id @default(cuid())
-  email              String?    @unique
+  id                 String          @id @default(cuid())
+  email              String?         @unique
   password           String?
   emailVerified      DateTime?
   image              String?
-  role               Role       @default(TRAINER)
+  role               Role            @default(ADMIN)
   name               String?
   gender             Gender?
   birthDate          DateTime?
   bio                String?
-  emailNotifications Boolean    @default(true)
-  smsNotifications   Boolean    @default(false)
+  emailNotifications Boolean         @default(true)
+  smsNotifications   Boolean         @default(false)
+  membership         MembershipType?
+  status             UserStatus?
+  createdAt          DateTime        @default(now())
+  specialization     String? // New field for trainers
+  rating             Float? // New field for trainers
+  clientsCount       Int?            @default(0) // New field for trainers
   accounts           Account[]
   sessions           Session[]
-  userSchedules      Schedule[] @relation("UserSchedules")
-  trainerSchedules   Schedule[] @relation("TrainerSchedules")
+  userSchedules      Schedule[]      @relation("UserSchedules")
+  trainerSchedules   Schedule[]      @relation("TrainerSchedules")
 }
 
 model Account {
@@ -56,6 +62,7 @@ model Schedule {
   scheduleLink        String?
   scheduleSubject     String
   scheduleDescription String?
+  sessionType         String?
   status              String   @default("pending")
   userId              String
   trainerId           String
@@ -76,6 +83,14 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 enum Role {
   USER
   ADMIN
@@ -85,4 +100,14 @@ enum Role {
 enum Gender {
   MALE
   FEMALE
+}
+
+enum MembershipType {
+  BASIC
+  PREMIUM
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
 }

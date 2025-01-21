@@ -30,10 +30,6 @@ export async function PUT(
     const schedule = await prisma.schedule.update({
       where: {
         id: scheduleId,
-        OR: [
-          { userId: decoded.user.id },
-          { trainerId: decoded.user.id }
-        ]
       },
       data: body
     })
@@ -66,10 +62,6 @@ export async function DELETE(
     await prisma.schedule.delete({
       where: {
         id: scheduleId,
-        OR: [
-          { userId: session.user.id },
-          { trainerId: session.user.id }
-        ]
       }
     })
 

@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== "TRAINER") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
@@ -21,34 +21,50 @@ export async function POST(request: Request) {
       scheduleSubject,
       scheduleDescription,
       userId,
+      trainerId,
     } = body;
 
-    if (!date || !startTime || !endTime || !scheduleSubject || !userId) {
+    if (
+      !date ||
+      !startTime ||
+      !endTime ||
+      !scheduleSubject ||
+      !userId ||
+      !trainerId
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
+    // Combine date and time strings into a single Date object
+    const combineDateAndTime = (dateStr: string, timeStr: string) => {
+      const [year, month, day] = dateStr.split("-").map(Number);
+      const [hours, minutes] = timeStr.split(":").map(Number);
+      return new Date(year, month - 1, day, hours, minutes);
+    };
+
     const schedule = await prisma.schedule.create({
       data: {
         date: new Date(date),
-        startTime: new Date(startTime),
-        endTime: new Date(endTime),
+        startTime: combineDateAndTime(date, startTime),
+        endTime: combineDateAndTime(date, endTime),
         scheduleSubject,
         scheduleDescription,
         status: "pending",
         userId,
-        trainerId: session.user.id,
+        trainerId,
       },
     });
 
     return NextResponse.json({ schedule }, { status: 201 });
   } catch (error) {
+    // console.error("Error creating schedule:", error);
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
+        error: "An error occurred while creating the schedule",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );

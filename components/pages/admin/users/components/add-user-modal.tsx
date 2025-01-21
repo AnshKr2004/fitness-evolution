@@ -18,14 +18,50 @@ import {
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { toast } from "sonner"
 
 interface AddUserModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onSuccess: () => void
 }
 
-export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
+export function AddUserModal({ open, onOpenChange, onSuccess }: AddUserModalProps) {
   const [showPassword, setShowPassword] = useState(false)
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    const userData = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      password: formData.get('password'),
+      membership: formData.get('membership'),
+    }
+
+    try {
+      const response = await fetch('/api/mobile/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      })
+
+      if (response.ok) {
+        onOpenChange(false)
+        onSuccess()
+        toast.success("User Created Successfully.")
+        window.location.reload()
+      } else {
+        // Handle error
+        console.error('Failed to create user')
+      }
+    } catch (error) {
+      console.error('Error creating user:', error)
+      toast.error("An error occurred while creating the user.")
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -33,22 +69,24 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
         <DialogHeader>
           <DialogTitle>Add New User</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+        <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Full Name</Label>
-            <Input id="name" placeholder="Enter full name" />
+            <Input id="name" name="name" placeholder="Enter full name" required />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="Enter email" />
+            <Input id="email" name="email" type="email" placeholder="Enter email" required />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
             <div className="relative">
               <Input
                 id="password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter password"
+                required
               />
               <Button
                 type="button"
@@ -70,7 +108,7 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="membership">Membership Type</Label>
-            <Select>
+            <Select name="membership">
               <SelectTrigger id="membership">
                 <SelectValue placeholder="Select membership type" />
               </SelectTrigger>
@@ -80,26 +118,13 @@ export function AddUserModal({ open, onOpenChange }: AddUserModalProps) {
               </SelectContent>
             </Select>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="status">Status</Label>
-            <Select>
-              <SelectTrigger id="status">
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">Add User</Button>
           </div>
-        </div>
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button type="submit" className="bg-blue-600 dark:bg-blue-700">Add User</Button>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   )

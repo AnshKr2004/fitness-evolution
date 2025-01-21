@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,40 +9,40 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 
 interface User {
-  id: string;
-  name: string;
+  id: string
+  name: string
 }
 
 interface AddClassModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
   onSave: (newClass: {
-    date: string;
-    startTime: string;
-    endTime: string;
-    scheduleSubject: string;
-    scheduleDescription: string;
-    userId: string;
-  }) => void;
-  users: User[];
+    date: string
+    startTime: string
+    endTime: string
+    scheduleSubject: string
+    scheduleDescription: string
+    userId: string
+  }) => void
+  users: User[]
 }
 
 export function AddClassModal({ isOpen, onClose, onSave, users }: AddClassModalProps) {
-  const [date, setDate] = useState('')
-  const [startTime, setStartTime] = useState('')
-  const [endTime, setEndTime] = useState('')
-  const [scheduleSubject, setScheduleSubject] = useState('')
-  const [scheduleDescription, setScheduleDescription] = useState('')
-  const [userId, setUserId] = useState('')
+  const [date, setDate] = useState("")
+  const [startTime, setStartTime] = useState("")
+  const [endTime, setEndTime] = useState("")
+  const [scheduleSubject, setScheduleSubject] = useState("")
+  const [scheduleDescription, setScheduleDescription] = useState("")
+  const [userId, setUserId] = useState("")
 
   const handleSave = () => {
     onSave({
       date,
-      startTime: `${date}T${startTime}:00`,
-      endTime: `${date}T${endTime}:00`,
+      startTime,
+      endTime,
       scheduleSubject,
       scheduleDescription,
-      userId
+      userId,
     })
     onClose()
   }
@@ -131,7 +131,9 @@ export function AddClassModal({ isOpen, onClose, onSave, users }: AddClassModalP
           </div>
         </div>
         <DialogFooter>
-          <Button type="submit" onClick={handleSave}>Add Class</Button>
+          <Button type="submit" onClick={handleSave}>
+            Add Class
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

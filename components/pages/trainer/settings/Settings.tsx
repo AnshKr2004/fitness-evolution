@@ -26,6 +26,36 @@ import {
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { EyeOff, Eye } from "lucide-react"
+
+// Password Input Component
+const PasswordInput = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement> & { showPassword: boolean; onTogglePassword: () => void }
+>(({ showPassword, onTogglePassword, ...props }, ref) => {
+  return (
+    <div className="relative">
+      <Input
+        {...props}
+        type={showPassword ? "text" : "password"}
+        ref={ref}
+      />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="absolute right-2 top-1/2 -translate-y-1/2"
+        onClick={onTogglePassword}
+      >
+        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        <span className="sr-only">
+          {showPassword ? "Hide password" : "Show password"}
+        </span>
+      </Button>
+    </div>
+  )
+})
+PasswordInput.displayName = "PasswordInput"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -47,6 +77,8 @@ export default function SettingsPage() {
   const { data: session, update } = useSession()
   const [isLoading, setIsLoading] = React.useState(true)
   const [hasPassword, setHasPassword] = React.useState(false)
+  const [showPassword, setShowPassword] = React.useState(false)
+  
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -118,6 +150,7 @@ export default function SettingsPage() {
           },
         })
         toast.success("Your settings have been updated successfully.")
+        window.location.reload()
         if (values.newPassword) {
           setHasPassword(true)
         }
@@ -138,6 +171,72 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return <div>Loading...</div>
+  }
+
+  const renderPasswordFields = () => {
+    if (hasPassword) {
+      return (
+        <>
+          <FormField
+            control={form.control}
+            name="currentPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Current Password</FormLabel>
+                <FormControl>
+                  <PasswordInput
+                    {...field}
+                    showPassword={showPassword}
+                    onTogglePassword={() => setShowPassword(!showPassword)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="newPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>New Password</FormLabel>
+                <FormControl>
+                  <PasswordInput
+                    {...field}
+                    showPassword={showPassword}
+                    onTogglePassword={() => setShowPassword(!showPassword)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </>
+      )
+    }
+    
+    return (
+      <FormField
+        control={form.control}
+        name="newPassword"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Set Password</FormLabel>
+            <FormControl>
+              <PasswordInput
+                {...field}
+                showPassword={showPassword}
+                onTogglePassword={() => setShowPassword(!showPassword)}
+              />
+            </FormControl>
+            <FormDescription>
+              Set a password for your account
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    )
   }
 
   return (
@@ -246,53 +345,7 @@ export default function SettingsPage() {
               <div className="space-y-6">
                 <h3 className="text-lg font-medium">Security</h3>
                 <div className="grid gap-6 md:grid-cols-2">
-                  {hasPassword ? (
-                    <>
-                      <FormField
-                        control={form.control}
-                        name="currentPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Current Password</FormLabel>
-                            <FormControl>
-                              <Input {...field} type="password" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="newPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>New Password</FormLabel>
-                            <FormControl>
-                              <Input {...field} type="password" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </>
-                  ) : (
-                    <FormField
-                      control={form.control}
-                      name="newPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Set Password</FormLabel>
-                          <FormControl>
-                            <Input {...field} type="password" />
-                          </FormControl>
-                          <FormDescription>
-                            Set a password for your account
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
+                  {renderPasswordFields()}
                 </div>
               </div>
 

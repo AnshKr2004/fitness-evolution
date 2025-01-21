@@ -12,6 +12,7 @@ export interface Schedule {
   scheduleLink?: string;
   scheduleSubject: string;
   scheduleDescription?: string;
+  sessionType?: string
   status: ScheduleStatus;
   userId: string;
   trainerId: string;
@@ -34,6 +35,7 @@ export interface CreateScheduleDTO {
   scheduleLink?: string;
   scheduleSubject: string;
   scheduleDescription?: string;
+  sessionType?: string;
   trainerId?: string;
 }
 
@@ -59,4 +61,22 @@ export interface ScheduleItem {
   title: string;
   startTime: string;
   endTime: string;
+}
+
+export interface Session {
+  id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  scheduleSubject: string;
+  scheduleLink?: string;
+  status: ScheduleStatus;
+  trainer: {
+    name: string;
+    image: string;
+  };
+  user: {
+    name: string;
+    image: string;
+  };
 }

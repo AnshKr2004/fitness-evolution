@@ -1,86 +1,129 @@
 "use client"
 
-import { useState } from "react"
-import { Activity, Calendar, Clock, TrendingUp } from 'lucide-react'
+import { useState, useEffect } from "react"
+import { Activity, Calendar, Clock, TrendingUp } from "lucide-react"
+import { toast } from "sonner"
 import { AssignSessionModal } from "./components/assign-session-modal"
 import { SessionsTable } from "./components/sessions-table"
 import { UnifiedStatCard } from "@/components/pages/components/unified-stat-card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import type { Session } from "@/types/schedule"
 
-interface Participant {
-  name: string
-  avatar: string
+interface Stats {
+  totalSessions: number
+  activeSessions: number
+  pendingSessions: number
+  completionRate: number
 }
-
-interface Session {
-  id: string
-  dateTime: string
-  type: string
-  trainer: Participant
-  client: Participant
-  status: 'scheduled' | 'pending'
-}
-
-interface AssignSessionData {
-  sessionId: string
-  dateTime: string
-  sessionType: string
-}
-
-const mockSessions: Session[] = [
-  {
-    id: "S1234",
-    dateTime: "2024-02-20 10:00 AM",
-    type: "Strength Training",
-    trainer: {
-      name: "Mike Johnson",
-      avatar: "/placeholder.svg",
-    },
-    client: {
-      name: "Emma Wilson",
-      avatar: "/placeholder.svg",
-    },
-    status: "scheduled",
-  },
-  {
-    id: "S1235",
-    dateTime: "2024-02-20 11:30 AM",
-    type: "Yoga",
-    trainer: {
-      name: "Sarah Williams",
-      avatar: "/placeholder.svg",
-    },
-    client: {
-      name: "John Davis",
-      avatar: "/placeholder.svg",
-    },
-    status: "pending",
-  },
-]
 
 export default function Sessions() {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [sessions, setSessions] = useState<Session[]>(mockSessions)
+  const [stats, setStats] = useState<Stats>({
+    totalSessions: 0,
+    activeSessions: 0,
+    pendingSessions: 0,
+    completionRate: 0,
+  })
 
-  const handleAssignSession = (data: AssignSessionData) => {
-    setSessions([
-      ...sessions,
-      {
-        id: data.sessionId,
-        dateTime: data.dateTime,
-        type: data.sessionType,
-        trainer: {
-          name: "New Trainer",
-          avatar: "/placeholder.svg",
+  useEffect(() => {
+    fetchStats()
+  }, [])
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch("/api/schedule/stats")
+      const data = await response.json()
+      setStats(data)
+    } catch (error) {
+      console.error("Error fetching stats:", error)
+      toast.error("Failed to fetch session statistics")
+    }
+  }
+
+  const handleAssignSession = async (data: any) => {
+    try {
+      const response = await fetch("/api/schedule/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        client: {
-          name: "New Client",
-          avatar: "/placeholder.svg",
+        body: JSON.stringify(data),
+      })
+      if (response.ok) {
+        fetchStats()
+        toast.success("Session assigned successfully")
+        setIsModalOpen(false)
+        window.location.reload()
+      } else {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to assign session")
+      }
+    } catch (error) {
+      console.error("Error assigning session:", error)
+      toast.error(error instanceof Error ? error.message : "Failed to assign session")
+    }
+  }
+
+  const handleEditSession = async (id: string, data: Partial<Session>) => {
+    try {
+      const response = await fetch(`/api/schedule/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
         },
-        status: "pending",
-      },
-    ])
+        body: JSON.stringify(data),
+      })
+      if (response.ok) {
+        fetchStats()
+        toast.success("Session updated successfully")
+        window.location.reload()
+      } else {
+        throw new Error("Failed to update session")
+      }
+    } catch (error) {
+      console.error("Error updating session:", error)
+      toast.error("Failed to update session")
+    }
+  }
+
+  const handleDeleteSession = async (id: string) => {
+    try {
+      const response = await fetch(`/api/schedule/${id}`, {
+        method: "DELETE",
+      })
+      if (response.ok) {
+        fetchStats()
+        toast.success("Session deleted successfully")
+        window.location.reload()
+      } else {
+        throw new Error("Failed to delete session")
+      }
+    } catch (error) {
+      console.error("Error deleting session:", error)
+      toast.error("Failed to delete session")
+    }
+  }
+
+  const handleAddLink = async (id: string, link: string) => {
+    try {
+      const response = await fetch(`/api/schedule/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ scheduleLink: link, status: "upcoming" }),
+      })
+      if (response.ok) {
+        fetchStats()
+        toast.success("Link added successfully")
+        window.location.reload()
+      } else {
+        throw new Error("Failed to add link")
+      }
+    } catch (error) {
+      console.error("Error adding link:", error)
+      toast.error("Failed to add link")
+    }
   }
 
   return (
@@ -88,25 +131,25 @@ export default function Sessions() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <UnifiedStatCard
           title="Total Sessions"
-          value="128"
+          value={stats.totalSessions.toString()}
           icon={Calendar}
           className="bg-blue-600 dark:bg-blue-700"
         />
         <UnifiedStatCard
           title="Active Sessions"
-          value="45"
+          value={stats.activeSessions.toString()}
           icon={Clock}
           className="bg-green-600 dark:bg-green-700"
         />
         <UnifiedStatCard
           title="Pending Sessions"
-          value="15"
+          value={stats.pendingSessions.toString()}
           icon={Activity}
           className="bg-amber-600 dark:bg-amber-700"
         />
         <UnifiedStatCard
           title="Completion Rate"
-          value="92%"
+          value={`${stats.completionRate.toFixed(2)}%`}
           icon={TrendingUp}
           className="bg-purple-600 dark:bg-purple-700"
         />
@@ -115,35 +158,15 @@ export default function Sessions() {
       <div className="space-y-4">
         <div className="lg:flex items-center justify-between">
           <h2 className="text-2xl font-bold mb-5 lg:mb-0">Session Management</h2>
-          <div className="flex items-center gap-4">
-            <Input
-              placeholder="Search sessions..."
-              className="w-[300px]"
-            />
-            <Button onClick={() => setIsModalOpen(true)} className="bg-blue-600 dark:bg-blue-700">
-              Assign Session
-            </Button>
-          </div>
+          <Button onClick={() => setIsModalOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+            Assign Session
+          </Button>
         </div>
 
-        <SessionsTable
-          sessions={sessions}
-          onEdit={(id) => console.log("Edit session", id)}
-          onDelete={(id) => {
-            setSessions(sessions.filter((session) => session.id !== id))
-          }}
-        />
-
-        <div className="text-sm text-muted-foreground">
-          Showing 1 to 2 of 128 results
-        </div>
+        <SessionsTable onEdit={handleEditSession} onDelete={handleDeleteSession} onAddLink={handleAddLink} />
       </div>
 
-      <AssignSessionModal
-        open={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        onSubmit={handleAssignSession}
-      />
+      <AssignSessionModal open={isModalOpen} onOpenChange={setIsModalOpen} onSubmit={handleAssignSession} />
     </div>
   )
 }
