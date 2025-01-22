@@ -125,7 +125,7 @@ export default function SettingsPage() {
   async function onSubmit(values: FormValues) {
     try {
       const updateData = { ...values }
-      if (!hasPassword) {
+      if (hasPassword) {
         delete updateData.currentPassword
       } else if (!updateData.newPassword) {
         delete updateData.currentPassword
@@ -174,7 +174,7 @@ export default function SettingsPage() {
   }
 
   const renderPasswordFields = () => {
-    if (hasPassword) {
+    if (!hasPassword) {
       return (
         <>
           <FormField
