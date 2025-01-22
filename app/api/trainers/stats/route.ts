@@ -13,17 +13,20 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const totalTrainers = await prisma.user.count({
-      where: { role: "TRAINER" },
-    });
-    const activeTrainers = await prisma.user.count({
-      where: { role: "TRAINER", status: "ACTIVE" },
-    });
-
-    const trainers = await prisma.user.findMany({
-      where: { role: "TRAINER" },
-      select: { rating: true, clientsCount: true },
-    });
+    const [totalTrainers, activeTrainers, trainers] = await Promise.all([
+      prisma.user.count({ where: { role: "TRAINER" } }),
+      prisma.user.count({ where: { role: "TRAINER", status: "ACTIVE" } }),
+      prisma.user.findMany({
+        where: { role: "TRAINER" },
+        select: {
+          rating: true,
+          clientsCount: true,
+          name: true,
+          sessions: true,
+          status: true,
+        },
+      }),
+    ]);
 
     const totalRating = trainers.reduce(
       (sum, trainer) => sum + (trainer.rating || 0),
@@ -32,12 +35,12 @@ export async function GET() {
     const avgRating = totalTrainers > 0 ? totalRating / totalTrainers : 0;
 
     const totalClients = trainers.reduce(
-      (sum, trainer) =>
-        sum + (trainer.clientsCount !== null ? trainer.clientsCount : 0),
+      (sum, trainer) => sum + (trainer.clientsCount ?? 0),
       0
     );
 
     return NextResponse.json({
+      trainers,
       totalTrainers,
       activeTrainers,
       avgRating,

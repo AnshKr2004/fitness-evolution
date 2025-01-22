@@ -1,9 +1,16 @@
+"use client"
 import { Users, Dumbbell, Calendar, MessageSquare } from 'lucide-react'
 import { UnifiedStatCard } from "@/components/pages/components/unified-stat-card"
 import { ActivityChart } from "./components/activity-chart"
 import { DistributionChart } from "./components/distribution-chart"
+import { useAdminContext } from '@/context/admin'
 
 export default function DashboardPage() {
+  const {
+    userStats: {totalUsers},
+    trainerStats: {activeTrainers, trainers},
+    sessionsStats: {pendingSessions}
+  } = useAdminContext()
   return (
     <div className="space-y-6 p-6 lg:ml-64">
       <main className="p-4 pt-7">
@@ -11,19 +18,19 @@ export default function DashboardPage() {
           <UnifiedStatCard
             icon={Users}
             title="Total Users"
-            value="2,543"
+            value={totalUsers.toString()}
             className="bg-blue-600 dark:bg-blue-700"
           />
           <UnifiedStatCard
             icon={Dumbbell}
             title="Active Trainers"
-            value="48"
+            value={activeTrainers.toString()}
             className="bg-green-600 dark:bg-green-700"
           />
           <UnifiedStatCard
             icon={Calendar}
             title="Pending Sessions"
-            value="156"
+            value={pendingSessions.toString()}
             className="bg-amber-600 dark:bg-amber-700"
           />
           <UnifiedStatCard
@@ -43,17 +50,13 @@ export default function DashboardPage() {
           <div className="rounded-lg bg-[#0284C7] p-6">
             <h3 className="mb-4 text-lg font-medium text-white">Active Trainers</h3>
             <div className="space-y-4">
-              {[
-                { name: "Mike Johnson", sessions: "5 sessions today", status: "Online" },
-                { name: "Sarah Smith", sessions: "3 sessions today", status: "Busy" },
-                { name: "David Lee", sessions: "4 sessions today", status: "Offline" },
-              ].map((trainer) => (
+              {trainers.map((trainer) => (
                 <div key={trainer.name} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-sky-700" />
                     <div>
                       <p className="font-medium text-white">{trainer.name}</p>
-                      <p className="text-sm text-sky-200">{trainer.sessions}</p>
+                      <p className="text-sm text-sky-200">{trainer.sessions.length} sessions</p>
                     </div>
                   </div>
                   <span className="rounded-full bg-sky-700 px-3 py-1 text-xs text-white">

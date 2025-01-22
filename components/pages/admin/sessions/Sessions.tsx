@@ -8,6 +8,7 @@ import { SessionsTable } from "./components/sessions-table"
 import { UnifiedStatCard } from "@/components/pages/components/unified-stat-card"
 import { Button } from "@/components/ui/button"
 import type { Session } from "@/types/schedule"
+import { useAdminContext } from "@/context/admin"
 
 interface Stats {
   totalSessions: number
@@ -18,29 +19,23 @@ interface Stats {
 
 export default function Sessions() {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [stats, setStats] = useState<Stats>({
-    totalSessions: 0,
-    activeSessions: 0,
-    pendingSessions: 0,
-    completionRate: 0,
-  })
-
-  useEffect(() => {
-    fetchStats()
-  }, [])
+  const {
+    sessionsStats: stats,
+    setSessionsStats
+  } = useAdminContext()
 
   const fetchStats = async () => {
     try {
       const response = await fetch("/api/schedule/stats")
       const data = await response.json()
-      setStats(data)
+      setSessionsStats(data)
     } catch (error) {
       console.error("Error fetching stats:", error)
       toast.error("Failed to fetch session statistics")
     }
   }
 
-  const handleAssignSession = async (data: any) => {
+  const handleAssignSession = async (data: unknown) => {
     try {
       const response = await fetch("/api/schedule/create", {
         method: "POST",

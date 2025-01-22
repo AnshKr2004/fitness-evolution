@@ -5,6 +5,7 @@ import { Dumbbell, Star, Users, Users2 } from 'lucide-react'
 
 import { UnifiedStatCard } from "@/components/pages/components/unified-stat-card"
 import { TrainerTable } from "./components/trainer-table"
+import { useAdminContext } from '@/context/admin'
 
 interface TrainerStats {
   totalTrainers: number
@@ -14,31 +15,9 @@ interface TrainerStats {
 }
 
 export default function TrainersPage() {
-  const [stats, setStats] = useState<TrainerStats>({
-    totalTrainers: 0,
-    activeTrainers: 0,
-    avgRating: 0,
-    totalClients: 0
-  })
-
-  useEffect(() => {
-    fetchTrainerStats()
-  }, [])
-
-  const fetchTrainerStats = async () => {
-    try {
-      const response = await fetch('/api/trainers/stats')
-      if (response.ok) {
-        const data = await response.json()
-        setStats(data)
-      } else {
-        console.error('Failed to fetch trainer stats')
-      }
-    } catch (error) {
-      console.error('Error fetching trainer stats:', error)
-    }
-  }
-
+  const {
+    trainerStats: stats
+  } = useAdminContext()
   return (
     <div className="space-y-6 p-6 lg:ml-64">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

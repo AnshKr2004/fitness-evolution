@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react'
 import { Users, UserCheck, UserPlus, UserX } from 'lucide-react'
 import { UnifiedStatCard } from "@/components/pages/components/unified-stat-card"
+import { useAdminContext } from '@/context/admin'
 
-interface UserStats {
+export interface UserStats {
   totalUsers: number
   activeUsers: number
   newUsers: number
@@ -12,28 +13,9 @@ interface UserStats {
 }
 
 export function StatsCards() {
-  const [stats, setStats] = useState<UserStats>({
-    totalUsers: 0,
-    activeUsers: 0,
-    newUsers: 0,
-    inactiveUsers: 0,
-  })
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch('/api/users/stats')
-        if (response.ok) {
-          const data = await response.json()
-          setStats(data)
-        }
-      } catch (error) {
-        console.error('Error fetching user stats:', error)
-      }
-    }
-
-    fetchStats()
-  }, [])
+  const {
+    userStats: stats
+  } = useAdminContext()
 
   const statCards = [
     {
