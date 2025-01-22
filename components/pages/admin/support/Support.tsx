@@ -1,73 +1,54 @@
-import { AlertCircle, MessageCircle, Users } from 'lucide-react'
+"use client";
+import { AlertCircle, MessageCircle, Users } from "lucide-react";
 
-import { ChatEntry } from "./components/chat-entry"
-import { UnifiedStatCard } from "@/components/pages/components/unified-stat-card"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { UnifiedStatCard } from "@/components/pages/components/unified-stat-card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { ChatEntry } from "./components/chat-entry";
 
-const metrics = [
-  {
-    title: "Active Alerts",
-    value: "8",
-    icon: AlertCircle,
-    className: "bg-red-600 dark:bg-red-700",
-  },
-  {
-    title: "Active Chats",
-    value: "15",
-    icon: MessageCircle,
-    className: "bg-blue-600 dark:bg-blue-700",
-  },
-  {
-    title: "Online Users",
-    value: "42",
-    icon: Users,
-    className: "bg-green-600 dark:bg-green-700",
-  },
-]
-
-type ChatData = {
-  name: string
-  status: string
-  indicator: "Live" | "Alert" | "Critical" | "New"
+export interface AllChatResponse {
+  id: string;
+  user: {
+    name: string;
+    image: string | null;
+  };
+  trainer: {
+    name: string;
+    image: string | null;
+  };
+  messages: {
+    id: string;
+    content: string;
+    createdAt: string;
+  }[];
 }
 
-const activeChats: ChatData[] = [
-  {
-    name: "John Smith",
-    status: "Active with 3 clients",
-    indicator: "Live",
-  },
-  {
-    name: "Sarah Johnson",
-    status: "Active with 2 clients",
-    indicator: "Live",
-  },
-  {
-    name: "Mike Wilson",
-    status: "Active with 1 client",
-    indicator: "Live",
-  },
-]
-
-const chatMonitors: ChatData[] = [
-  {
-    name: "Emma Davis",
-    status: "Chatting with John Smith",
-    indicator: "Alert",
-  },
-  {
-    name: "Tom Brown",
-    status: "Chatting with Sarah Johnson",
-    indicator: "Critical",
-  },
-  {
-    name: "Lisa Chen",
-    status: "Chatting with Mike Wilson",
-    indicator: "New",
-  },
-]
+export interface TrainerDetailsWithCounts {
+  trainerName: string;
+  trainerImage: string | null;
+  userCount: number;
+}
 
 export default function DashboardPage() {
+  const [allChat, setAllChat] = useState<AllChatResponse[] | []>([]);
+  const [trainerDetailsWithCounts, setTrainerDetailsWithCounts] = useState<
+    TrainerDetailsWithCounts[] | []
+  >([]);
+
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const response = await fetch("/api/help/admin");
+        const { chats, trainerDetailsWithCounts } = await response.json();
+        setAllChat(chats);
+        setTrainerDetailsWithCounts(trainerDetailsWithCounts);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchChats();
+  }, []);
   return (
     <div className="space-y-8 p-8 lg:ml-64">
       {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -82,9 +63,18 @@ export default function DashboardPage() {
             <CardTitle>Active Chats</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {activeChats.map((chat) => (
-              <ChatEntry key={chat.name} {...chat} />
-            ))}
+            {trainerDetailsWithCounts.length > 0 ? (
+              trainerDetailsWithCounts.map((chat) => (
+                <ChatEntry
+                  key={chat.trainerName}
+                  trainerDetailsWithCounts={chat}
+                />
+              ))
+            ) : (
+              <div className="flex items-center justify-center space-x-2">
+                <p>No active chats found</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -93,12 +83,16 @@ export default function DashboardPage() {
             <CardTitle>Chat Monitor & Alerts</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {chatMonitors.map((monitor) => (
-              <ChatEntry key={monitor.name} {...monitor} />
-            ))}
+            {allChat.length > 0 ? (
+              allChat.map((chat) => <ChatEntry key={chat.id} chat={chat} />)
+            ) : (
+              <div className="flex items-center justify-center space-x-2">
+                <p>No active chats found</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }
