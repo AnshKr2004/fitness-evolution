@@ -70,11 +70,11 @@ const chatMonitors: ChatData[] = [
 export default function DashboardPage() {
   return (
     <div className="space-y-8 p-8 lg:ml-64">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {metrics.map((metric) => (
           <UnifiedStatCard key={metric.title} {...metric} />
         ))}
-      </div>
+      </div> */}
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>

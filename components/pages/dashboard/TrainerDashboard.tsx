@@ -34,7 +34,7 @@ export default function TrainerDashboard() {
             type="clients"
           />
           <StatCard title="Active Programs" value={8} type="programs" />
-          <StatCard title="Sessions Today" value={5} type="sessions" />
+          <StatCard title="Sessions Today" value={todaySchedule.length} type="sessions" />
         </div>
 
         {/* Dashboard Header */}

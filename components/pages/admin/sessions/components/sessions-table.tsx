@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -37,6 +37,7 @@ interface Session {
     name: string
     image: string
   }
+  sessionType: string
   status: 'pending' | 'completed' | 'upcoming'
 }
 
@@ -55,11 +56,7 @@ export function SessionsTable({ onEdit, onDelete, onAddLink }: SessionsTableProp
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [selectedSession, setSelectedSession] = useState<Session | null>(null)
 
-  useEffect(() => {
-    fetchSessions()
-  }, [currentPage, searchTerm])
-
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     try {
       const response = await fetch(`/api/schedule?page=${currentPage}&search=${searchTerm}`)
       const data = await response.json()
@@ -68,7 +65,13 @@ export function SessionsTable({ onEdit, onDelete, onAddLink }: SessionsTableProp
     } catch (error) {
       console.error('Error fetching sessions:', error)
     }
-  }
+  },[currentPage, searchTerm])
+
+  useEffect(() => {
+    fetchSessions()
+  }, [currentPage, fetchSessions, searchTerm])
+
+
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value)
@@ -152,6 +155,7 @@ export function SessionsTable({ onEdit, onDelete, onAddLink }: SessionsTableProp
           <TableRow>
             <TableHead>Date</TableHead>
             <TableHead>Time</TableHead>
+            <TableHead>Type</TableHead>
             <TableHead>Subject</TableHead>
             <TableHead>Trainer</TableHead>
             <TableHead>Client</TableHead>
@@ -165,6 +169,7 @@ export function SessionsTable({ onEdit, onDelete, onAddLink }: SessionsTableProp
             <TableRow key={session.id}>
               <TableCell>{new Date(session.date).toLocaleDateString()}</TableCell>
               <TableCell>{`${formatTime(session.startTime)} - ${formatTime(session.endTime)}`}</TableCell>
+              <TableCell>{session.sessionType}</TableCell>
               <TableCell>{session.scheduleSubject}</TableCell>
               <TableCell>
                 <div className="flex items-center">
