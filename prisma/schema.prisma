@@ -29,6 +29,9 @@ model User {
   specialization     String? // New field for trainers
   rating             Float? // New field for trainers
   clientsCount       Int?            @default(0) // New field for trainers
+  userChats    Chat[]    @relation("UserChats")
+  trainerChats Chat[]    @relation("TrainerChats")
+  messages     Message[]
   accounts           Account[]
   sessions           Session[]
   userSchedules      Schedule[]      @relation("UserSchedules")
@@ -81,6 +84,33 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Chat {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  userId    String
+  trainerId String
+  user      User      @relation("UserChats", fields: [userId], references: [id])
+  trainer   User      @relation("TrainerChats", fields: [trainerId], references: [id])
+  messages  Message[]
+
+  @@index([userId])
+  @@index([trainerId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  chatId    String
+  senderId  String
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  sender    User     @relation(fields: [senderId], references: [id])
+
+  @@index([chatId])
+  @@index([senderId])
 }
 
 model SystemConfig {
