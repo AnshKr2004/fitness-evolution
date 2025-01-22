@@ -22,6 +22,7 @@ export async function GET() {
         bio: true,
         emailNotifications: true,
         smsNotifications: true,
+        trainerSchedules: true,
       },
     })
 

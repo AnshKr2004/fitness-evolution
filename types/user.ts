@@ -18,7 +18,13 @@ export interface UserStats {
   inactiveUsers: number;
 }
 
-
+export interface Trainer {
+  id: string;
+  name: string;
+  email: string;
+  clientsCount: number;
+  trainerSchedules:[]
+}
 
 export interface TrainerStats {
   trainers: {

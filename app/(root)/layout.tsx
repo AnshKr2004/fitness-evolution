@@ -1,17 +1,20 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { AdminProvider } from "@/context/admin";
+import { TrainerProvider } from "@/context/trainer";
 
 export default function RootLayout({
-    children,
+  children,
 }: Readonly<{
-    children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-    return (
-        <AdminProvider>
-            <Navbar />
-            <Sidebar />
-            {children}
-        </AdminProvider>
-    );
+  return (
+    <AdminProvider>
+      <TrainerProvider>
+        <Navbar />
+        <Sidebar />
+        {children}
+      </TrainerProvider>
+    </AdminProvider>
+  );
 }

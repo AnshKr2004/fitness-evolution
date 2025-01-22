@@ -1,5 +1,6 @@
 "use client";
 import { SessionsStats, TrainerStats, UserStats } from "@/types/user";
+import { useSession } from "next-auth/react";
 import { createContext, useContext, useEffect, useState } from "react";
 
 interface AdminContextType {
@@ -33,6 +34,9 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
     completionRate: 0,
   });
 
+  const {data} = useSession()
+  const user = data?.user
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -58,8 +62,8 @@ export const AdminProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    fetchData();
-  }, []);
+    if (user?.role === "ADMIN") fetchData();
+  }, [user?.role]);
 
   const value = {
     userStats,
