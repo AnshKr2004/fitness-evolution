@@ -5,17 +5,25 @@ import { authOptions } from "@/lib/auth.config"
 
 const prisma = new PrismaClient()
 
-export async function GET(request: NextRequest, { params }: { params: { chatId: string } }) {
+type RouteContext = {
+  params: Promise<{
+    chatId: string
+  }>
+}
+
+export async function GET(request: NextRequest, context: RouteContext) {
   const session = await getServerSession(authOptions)
 
   if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  const { chatId } = await context.params
+
   try {
     const chat = await prisma.chat.findUnique({
       where: {
-        id: params.chatId,
+        id: chatId,
         trainerId: session.user.id,
       },
       include: {

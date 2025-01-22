@@ -5,11 +5,18 @@ import { NextRequest, NextResponse } from "next/server"
 
 const prisma = new PrismaClient()
 
-export async function GET(request: NextRequest, { params }: { params: { chatId: string } }) {
+type RouteContext = {
+  params: Promise<{
+    chatId: string
+  }>
+}
+
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
+    const { chatId } = await context.params
     const messages = await prisma.message.findMany({
       where: {
-        chatId: params.chatId,
+        chatId: chatId,
       },
       include: {
         sender: {
@@ -34,17 +41,18 @@ export async function GET(request: NextRequest, { params }: { params: { chatId: 
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { chatId: string } }) {
+export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const decoded = (await authMiddleware(request)) as JwtPayload & {
       id: string
     }
+    const { chatId } = await context.params
     const { content } = await request.json()
 
     const message = await prisma.message.create({
       data: {
         content,
-        chatId: params.chatId,
+        chatId: chatId,
         senderId: decoded.id,
       },
       include: {

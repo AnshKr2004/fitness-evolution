@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -55,11 +55,7 @@ export function SessionsTable({ onEdit, onDelete, onAddLink }: SessionsTableProp
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [selectedSession, setSelectedSession] = useState<Session | null>(null)
 
-  useEffect(() => {
-    fetchSessions()
-  }, [currentPage, searchTerm])
-
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     try {
       const response = await fetch(`/api/schedule?page=${currentPage}&search=${searchTerm}`)
       const data = await response.json()
@@ -68,7 +64,11 @@ export function SessionsTable({ onEdit, onDelete, onAddLink }: SessionsTableProp
     } catch (error) {
       console.error('Error fetching sessions:', error)
     }
-  }
+  }, [currentPage, searchTerm])
+
+  useEffect(() => {
+    fetchSessions()
+  }, [fetchSessions])
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value)
