@@ -24,6 +24,7 @@ export interface Trainer {
   email: string;
   clientsCount: number;
   trainerSchedules:[]
+  sessions: [];
 }
 
 export interface TrainerStats {
@@ -45,4 +46,30 @@ export interface SessionsStats {
   activeSessions: number;
   pendingSessions: number;
   completionRate: number;
+}
+
+
+interface ScheduleTrainer {
+  name: string;
+}
+interface ScheduleUser {
+  name: string;
+}
+
+export interface TodaySchedule {
+  id: string;
+  date: string; // ISO 8601 date string
+  startTime: string; // ISO 8601 date string
+  endTime: string; // ISO 8601 date string
+  scheduleLink: string | null;
+  scheduleSubject: string;
+  scheduleDescription: string;
+  sessionType: string | null;
+  status: string;
+  userId: string;
+  trainerId: string;
+  createdAt: string; // ISO 8601 date string
+  updatedAt: string; // ISO 8601 date string
+  user: ScheduleUser;
+  trainer: ScheduleTrainer;
 }
