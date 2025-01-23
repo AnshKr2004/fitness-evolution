@@ -1,33 +1,45 @@
-import { useState } from "react"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog"
+import { useState, useEffect } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 
+interface User {
+  id: string
+  name: string
+  program?: {
+    currentProgress: number
+    status: string
+  }
+}
+
 interface ProgressModalProps {
   open: boolean
   onClose: () => void
-  onSave: (data: { clientName: string; progress: number; notes: string }) => void
+  onSave: (data: { userId: string; progress: number; notes: string }) => void
+  initialData: User | null
 }
 
-export function ProgressModal({ open, onClose, onSave }: ProgressModalProps) {
-  const [clientName, setClientName] = useState("")
+export function ProgressModal({ open, onClose, onSave, initialData }: ProgressModalProps) {
   const [progress, setProgress] = useState("")
   const [notes, setNotes] = useState("")
 
+  useEffect(() => {
+    if (initialData) {
+      setProgress(initialData.program?.currentProgress.toString() || "")
+      setNotes("")
+    }
+  }, [initialData])
+
   const handleSave = () => {
-    onSave({
-      clientName,
-      progress: Number(progress),
-      notes
-    })
+    if (initialData) {
+      onSave({
+        userId: initialData.id,
+        progress: Number(progress),
+        notes,
+      })
+    }
     onClose()
   }
 
@@ -40,11 +52,7 @@ export function ProgressModal({ open, onClose, onSave }: ProgressModalProps) {
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="clientName">Client Name</Label>
-            <Input
-              id="clientName"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-            />
+            <Input id="clientName" value={initialData?.name || ""} disabled />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="progress">Current Progress</Label>
@@ -60,11 +68,7 @@ export function ProgressModal({ open, onClose, onSave }: ProgressModalProps) {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
+            <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
           </div>
         </div>
         <DialogFooter>

@@ -15,21 +15,28 @@ export async function GET() {
 
     const clients = await prisma.user.findMany({
       where: {
-        role: "USER"
+        role: "USER",
+        trainerId: session.user.id,
       },
       select: {
         id: true,
         name: true,
         email: true,
-        image: true
-      }
+        image: true,
+        program: {
+          select: {
+            currentProgress: true,
+            status: true,
+          },
+        },
+      },
     })
 
     return NextResponse.json(clients)
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "An unknown error occurred" },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

@@ -1,38 +1,72 @@
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import { useTrainerContext } from "@/context/trainer";
-import { Settings } from "lucide-react";
-import { useState } from "react";
-import { ProgressItem } from "./components/progress-item";
-import { ProgressModal } from "./components/progress-modal";
-import { ScheduleItem } from "./components/schedule-item";
-import { StatCard } from "./components/stat-card";
-import { formatTime } from "@/lib/helper";
+import { Button } from "@/components/ui/button"
+import { useTrainerContext } from "@/context/trainer"
+import { Settings } from "lucide-react"
+import { useState, useEffect } from "react"
+import { ProgressItem } from "./components/progress-item"
+import { ProgressModal } from "./components/progress-modal"
+import { ScheduleItem } from "./components/schedule-item"
+import { StatCard } from "./components/stat-card"
+import { formatTime } from "@/lib/helper"
+
+interface User {
+  id: string
+  name: string
+  program?: {
+    currentProgress: number
+    status: string
+  }
+}
 
 export default function TrainerDashboard() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const { trainer, todaySchedule } = useTrainerContext();
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const { trainer, todaySchedule } = useTrainerContext()
+  const [users, setUsers] = useState<User[]>([])
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
-  const handleUpdateProgress = (data: {
-    clientName: string;
-    progress: number;
-    notes: string;
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const response = await fetch("/api/users/clients")
+      const data = await response.json()
+      setUsers(data)
+    }
+    fetchUsers()
+  }, [])
+
+  const handleUpdateProgress = async (data: {
+    userId: string
+    progress: number
+    notes: string
   }) => {
-    console.log("Progress updated:", data);
-    // Handle progress update logic here
-  };
+    try {
+      const response = await fetch(`/api/user/${data.userId}/program`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentProgress: data.progress,
+          notes: data.notes,
+        }),
+      })
+
+      if (response.ok) {
+        window.location.reload()
+      } else {
+        console.error("Failed to update progress")
+      }
+    } catch (error) {
+      console.error("Error updating progress:", error)
+    }
+  }
 
   return (
     <div className="space-y-6 p-6 lg:ml-64">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Stats Grid */}
         <div className="grid gap-4 md:grid-cols-3">
-          <StatCard
-            title="Total Clients"
-            value={trainer?.clientsCount || 0}
-            type="clients"
-          />
+          <StatCard title="Total Clients" value={trainer?.clientsCount || 0} type="clients" />
           <StatCard title="Active Programs" value={8} type="programs" />
           <StatCard title="Sessions Today" value={todaySchedule.length} type="sessions" />
         </div>
@@ -62,31 +96,28 @@ export default function TrainerDashboard() {
                   />
                 ))
               ) : (
-                <p className="p-4 text-gray-500 text-center">
-                  No sessions scheduled for today
-                </p>
+                <p className="p-4 text-gray-500 text-center">No sessions scheduled for today</p>
               )}
             </div>
           </div>
 
           {/* Progress Updates Section */}
           <div className="bg-white rounded-lg shadow">
-            <h2 className="p-4 font-medium border-b">
-              Client Progress Updates
-            </h2>
+            <h2 className="p-4 font-medium border-b">Client Progress Updates</h2>
             <div>
-              <ProgressItem
-                name="Lisa Chen"
-                goal="Weight Goal"
-                progress={80}
-                onUpdateProgress={() => setIsModalOpen(true)}
-              />
-              <ProgressItem
-                name="John Smith"
-                goal="Strength Goal"
-                progress={95}
-                onUpdateProgress={() => setIsModalOpen(true)}
-              />
+              {users.map((user) => (
+                <ProgressItem
+                  key={user.id}
+                  userId={user.id}
+                  name={user.name}
+                  progress={user.program?.currentProgress || 0}
+                  status={user.program?.status || "IN_PROGRESS"}
+                  onUpdateProgress={() => {
+                    setSelectedUser(user)
+                    setIsModalOpen(true)
+                  }}
+                />
+              ))}
             </div>
           </div>
         </div>
@@ -96,8 +127,9 @@ export default function TrainerDashboard() {
           open={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onSave={handleUpdateProgress}
+          initialData={selectedUser}
         />
       </div>
     </div>
-  );
+  )
 }

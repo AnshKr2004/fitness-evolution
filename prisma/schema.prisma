@@ -16,7 +16,7 @@ model User {
   password           String?
   emailVerified      DateTime?
   image              String?
-  role               Role            @default(ADMIN)
+  role               Role            @default(USER)
   name               String?
   gender             Gender?
   birthDate          DateTime?
@@ -26,16 +26,41 @@ model User {
   membership         MembershipType?
   status             UserStatus?
   createdAt          DateTime        @default(now())
-  specialization     String? // New field for trainers
-  rating             Float? // New field for trainers
-  clientsCount       Int?            @default(0) // New field for trainers
-  userChats    Chat[]    @relation("UserChats")
-  trainerChats Chat[]    @relation("TrainerChats")
-  messages     Message[]
+  specialization     String? // For trainers
+  rating             Float? // For trainers
+  clientsCount       Int?            @default(0) // For trainers
+  trainer            User?           @relation("UserTrainer", fields: [trainerId], references: [id])
+  trainerId          String?
+  clients            User[]          @relation("UserTrainer")
+  program            Program?
+  userChats          Chat[]          @relation("UserChats")
+  trainerChats       Chat[]          @relation("TrainerChats")
+  messages           Message[]
   accounts           Account[]
   sessions           Session[]
   userSchedules      Schedule[]      @relation("UserSchedules")
   trainerSchedules   Schedule[]      @relation("TrainerSchedules")
+}
+
+model Program {
+  id              String      @id @default(cuid())
+  status          ProgramStatus
+  wideStatus      WideStatus
+  currentProgress Float
+  notes           String?
+  userId          String      @unique
+  user            User        @relation(fields: [userId], references: [id])
+}
+
+enum ProgramStatus {
+  IN_PROGRESS
+  NEAR_COMPLETE
+  COMPLETED
+}
+
+enum WideStatus {
+  ACTIVE
+  INACTIVE
 }
 
 model Account {
