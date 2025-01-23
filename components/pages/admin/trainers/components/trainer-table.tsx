@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Edit2, Trash, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -47,11 +47,7 @@ export function TrainerTable() {
   })
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    fetchTrainers()
-  }, [paginationInfo.currentPage, searchTerm])
-
-  const fetchTrainers = async () => {
+  const fetchTrainers = useCallback(async () => {
     setIsLoading(true)
     try {
       const response = await fetch(`/api/trainers?page=${paginationInfo.currentPage}&limit=10&search=${searchTerm}`)
@@ -73,7 +69,11 @@ export function TrainerTable() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [paginationInfo.currentPage, searchTerm])
+
+  useEffect(() => {
+    fetchTrainers()
+  }, [fetchTrainers])
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value)

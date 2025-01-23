@@ -1,6 +1,6 @@
-import { authMiddleware } from "@/middleware"
+import { authOptions } from "@/lib/auth.config"
 import { PrismaClient } from "@prisma/client"
-import type { JwtPayload } from "jsonwebtoken"
+import { getServerSession } from "next-auth"
 import { NextRequest, NextResponse } from "next/server"
 
 const prisma = new PrismaClient()
@@ -43,8 +43,13 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    const decoded = (await authMiddleware(request)) as JwtPayload & {
-      id: string
+    const decoded = await getServerSession(authOptions);
+
+    if (!decoded) {
+      return NextResponse.json(
+        { error: "Invalid user" },
+        { status: 403 }
+      );
     }
     const { chatId } = await context.params
     const { content } = await request.json()
@@ -53,7 +58,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       data: {
         content,
         chatId: chatId,
-        senderId: decoded.id,
+        senderId: decoded.user.id,
       },
       include: {
         sender: {

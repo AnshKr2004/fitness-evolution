@@ -22,6 +22,7 @@ const trainerNavigation = [
   { name: "Analytics", href: "/trainer/analytics", icon: LineChart },
   { name: "Schedule", href: "/trainer/schedule", icon: Calendar },
   { name: "Settings", href: "/trainer/settings", icon: Settings },
+  { name: "Chats", href: "/trainer/chats", icon: MessageSquare },
   { name: "Help", href: "/trainer/help", icon: HelpCircle },
 ]
 

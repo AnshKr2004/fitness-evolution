@@ -65,13 +65,11 @@ export function SessionsTable({ onEdit, onDelete, onAddLink }: SessionsTableProp
     } catch (error) {
       console.error('Error fetching sessions:', error)
     }
-  },[currentPage, searchTerm])
+  }, [currentPage, searchTerm])
 
   useEffect(() => {
     fetchSessions()
-  }, [currentPage, fetchSessions, searchTerm])
-
-
+  }, [fetchSessions])
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value)

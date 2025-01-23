@@ -103,9 +103,15 @@ async function getTokens(): Promise<TokenResponse> {
   };
 }
 
+type RouteContext = {
+  params: Promise<{
+    scheduleId: string
+  }>
+}
+
 export async function POST(
   request: Request,
-  context: { params: { scheduleId: string } }
+  context: RouteContext
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -114,7 +120,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { scheduleId } = context.params;
+    const { scheduleId } = await context.params
 
     const schedule = await prisma.schedule.findUnique({
       where: { id: scheduleId },
