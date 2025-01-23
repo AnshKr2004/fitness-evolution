@@ -48,6 +48,12 @@ export async function GET(request: Request) {
         membership: true,
         image: true,
         createdAt: true,
+        trainer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       skip,
       take: limit,

@@ -1,17 +1,10 @@
 "use client"
 
 import { useState, useEffect, useId, useCallback } from "react"
-import { Search, UserPlus } from 'lucide-react'
+import { Search, UserPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { AddUserModal } from "./add-user-modal"
 import { EditUserModal } from "./edit-user-modal"
 import { DeleteUserModal } from "./delete-user-modal"
@@ -25,6 +18,10 @@ interface User {
   membership: "BASIC" | "PREMIUM" | null
   image: string | null
   createdAt: string
+  trainer: {
+    id: string
+    name: string
+  } | null
 }
 
 interface PaginationInfo {
@@ -52,7 +49,7 @@ export function UsersTable() {
   const previousButtonId = useId()
   const nextButtonId = useId()
 
-  const fetchUsers = useCallback(async (page: number, search: string = "") => {
+  const fetchUsers = useCallback(async (page: number, search = "") => {
     try {
       const response = await fetch(`/api/users/user?page=${page}&limit=10&search=${search}`)
       if (response.ok) {
@@ -61,7 +58,7 @@ export function UsersTable() {
         setPagination(data.pagination)
       }
     } catch (error) {
-      console.error('Error fetching users:', error)
+      console.error("Error fetching users:", error)
     }
   }, [])
 
@@ -85,12 +82,12 @@ export function UsersTable() {
   }
 
   const formatMembership = (membership: "BASIC" | "PREMIUM" | null): string => {
-    if (!membership) return 'N/A'
+    if (!membership) return "N/A"
     return membership.toLowerCase()
   }
 
   const formatStatus = (status: "ACTIVE" | "INACTIVE" | null): string => {
-    if (!status) return 'unknown'
+    if (!status) return "unknown"
     return status.toLowerCase()
   }
 
@@ -109,11 +106,7 @@ export function UsersTable() {
               onChange={handleSearch}
             />
           </div>
-          <Button 
-            id={addUserButtonId}
-            onClick={() => setIsAddUserOpen(true)} 
-            className="bg-blue-600 hover:bg-blue-700"
-          >
+          <Button id={addUserButtonId} onClick={() => setIsAddUserOpen(true)} className="bg-blue-600 hover:bg-blue-700">
             <UserPlus className="mr-2 h-4 w-4" />
             Add User
           </Button>
@@ -128,6 +121,7 @@ export function UsersTable() {
               <TableHead>Status</TableHead>
               <TableHead>Membership</TableHead>
               <TableHead>Created At</TableHead>
+              <TableHead>Trainer</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -137,24 +131,32 @@ export function UsersTable() {
                 <TableCell>
                   <div className="flex items-center gap-3">
                     {user.image ? (
-                      <Image src={user.image || "/pfp.jpg"} alt={user.name} height={40} width={40} className="rounded-full object-cover" />
+                      <Image
+                        src={user.image || "/pfp.jpg"}
+                        alt={user.name}
+                        height={40}
+                        width={40}
+                        className="rounded-full object-cover"
+                      />
                     ) : (
-                      <Image src="/pfp.jpg" alt={user.name} height={40} width={40} className="rounded-full object-cover" />
+                      <Image
+                        src="/pfp.jpg"
+                        alt={user.name}
+                        height={40}
+                        width={40}
+                        className="rounded-full object-cover"
+                      />
                     )}
                     <div>
                       <div className="font-medium">{user.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {user.email}
-                      </div>
+                      <div className="text-sm text-muted-foreground">{user.email}</div>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell>
                   <div
                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      user.status === "ACTIVE"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
+                      user.status === "ACTIVE" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                     }`}
                   >
                     {formatStatus(user.status)}
@@ -164,6 +166,7 @@ export function UsersTable() {
                   <span className="capitalize">{formatMembership(user.membership)}</span>
                 </TableCell>
                 <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                <TableCell>{user.trainer ? user.trainer.name : "N/A"}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Button variant="link" className="text-blue-500" onClick={() => handleEdit(user)}>
@@ -182,21 +185,22 @@ export function UsersTable() {
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Showing {(pagination.page - 1) * pagination.limit + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} results
+          Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
+          {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} results
         </p>
         <div className="flex items-center gap-2">
-          <Button 
+          <Button
             id={previousButtonId}
-            variant="outline" 
-            size="sm" 
+            variant="outline"
+            size="sm"
             onClick={() => fetchUsers(pagination.page - 1, searchTerm)}
             disabled={pagination.page === 1}
           >
             Previous
           </Button>
-          <Button 
+          <Button
             id={nextButtonId}
-            variant="outline" 
+            variant="outline"
             size="sm"
             onClick={() => fetchUsers(pagination.page + 1, searchTerm)}
             disabled={pagination.page === pagination.totalPages}
@@ -206,30 +210,30 @@ export function UsersTable() {
         </div>
       </div>
 
-      <AddUserModal 
-        open={isAddUserOpen} 
-        onOpenChange={setIsAddUserOpen} 
-        onSuccess={() => fetchUsers(pagination.page, searchTerm)} 
+      <AddUserModal
+        open={isAddUserOpen}
+        onOpenChange={setIsAddUserOpen}
+        onSuccess={() => fetchUsers(pagination.page, searchTerm)}
       />
       {selectedUser && (
         <>
-          <EditUserModal 
-            open={isEditUserOpen} 
-            onOpenChange={setIsEditUserOpen} 
-            user={selectedUser} 
+          <EditUserModal
+            open={isEditUserOpen}
+            onOpenChange={setIsEditUserOpen}
+            user={selectedUser}
             onSuccess={() => {
               fetchUsers(pagination.page, searchTerm)
               setSelectedUser(null)
-            }} 
+            }}
           />
-          <DeleteUserModal 
-            open={isDeleteUserOpen} 
-            onOpenChange={setIsDeleteUserOpen} 
-            user={selectedUser} 
+          <DeleteUserModal
+            open={isDeleteUserOpen}
+            onOpenChange={setIsDeleteUserOpen}
+            user={selectedUser}
             onSuccess={() => {
               fetchUsers(pagination.page, searchTerm)
               setSelectedUser(null)
-            }} 
+            }}
           />
         </>
       )}

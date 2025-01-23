@@ -11,22 +11,16 @@ type RouteContext = {
   }>
 }
 
-export async function PUT(
-  request: Request,
-  context: RouteContext
-) {
+export async function PUT(request: Request, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (
-      !session ||
-      (session.user.role !== "ADMIN" && session.user.role !== "TRAINER")
-    ) {
+    if (!session || (session.user.role !== "ADMIN" && session.user.role !== "TRAINER")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }
 
     const { userId } = await context.params
-    const { name, email, membership } = await request.json()
+    const { name, email, membership, status, trainerId } = await request.json()
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
@@ -34,6 +28,8 @@ export async function PUT(
         name,
         email,
         membership,
+        status,
+        trainerId: trainerId || null,
       },
     })
 
@@ -41,18 +37,14 @@ export async function PUT(
   } catch (error) {
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
+        error: error instanceof Error ? error.message : "An unknown error occurred",
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
 
-export async function DELETE(
-  request: Request,
-  context: RouteContext
-) {
+export async function DELETE(request: Request, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -70,10 +62,9 @@ export async function DELETE(
   } catch (error) {
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "An unknown error occurred",
+        error: error instanceof Error ? error.message : "An unknown error occurred",
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

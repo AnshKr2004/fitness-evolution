@@ -26,9 +26,9 @@ export function EditSessionModal({ isOpen, onClose, onConfirm, session }: EditSe
   useEffect(() => {
     if (session) {
       setFormData({
-        date: session.date,
-        startTime: session.startTime,
-        endTime: session.endTime,
+        date: new Date(session.date).toISOString().split("T")[0],
+        startTime: new Date(session.startTime).toTimeString().slice(0, 5),
+        endTime: new Date(session.endTime).toTimeString().slice(0, 5),
         scheduleSubject: session.scheduleSubject,
       })
     }
@@ -40,7 +40,14 @@ export function EditSessionModal({ isOpen, onClose, onConfirm, session }: EditSe
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onConfirm(formData)
+    const { date, startTime, endTime, scheduleSubject } = formData
+    const updatedData = {
+      date: new Date(date as string).toISOString(),
+      startTime: new Date(`${date}T${startTime}`).toISOString(),
+      endTime: new Date(`${date}T${endTime}`).toISOString(),
+      scheduleSubject,
+    }
+    onConfirm(updatedData)
   }
 
   return (

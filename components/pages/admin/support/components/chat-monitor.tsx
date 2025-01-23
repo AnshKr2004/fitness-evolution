@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AllChatResponse, TrainerDetailsWithCounts } from "../Support";
 
-export function ChatEntry({
+export function ChatMonitor({
   chat,
   trainerDetailsWithCounts,
 }: {
@@ -47,7 +47,7 @@ export function ChatEntry({
         </Avatar>
         <div>
           <p className="font-medium">{chat?.trainer.name}{trainerDetailsWithCounts?.trainerName}</p>
-          <p className="text-sm text-muted-foreground">{"Active with " + trainerDetailsWithCounts?.userCount.toString() + " client"}</p>
+          <p className="text-sm text-muted-foreground">{"Active with " + chat?.user.name}</p>
         </div>
       </div>
       {/* {indicator && (

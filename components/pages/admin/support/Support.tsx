@@ -5,6 +5,7 @@ import { UnifiedStatCard } from "@/components/pages/components/unified-stat-card
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { ChatEntry } from "./components/chat-entry";
+import { ChatMonitor } from "./components/chat-monitor";
 
 export interface AllChatResponse {
   id: string;
@@ -84,7 +85,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             {allChat.length > 0 ? (
-              allChat.map((chat) => <ChatEntry key={chat.id} chat={chat} />)
+              allChat.map((chat) => <ChatMonitor key={chat.id} chat={chat} />)
             ) : (
               <div className="flex items-center justify-center space-x-2">
                 <p>No active chats found</p>

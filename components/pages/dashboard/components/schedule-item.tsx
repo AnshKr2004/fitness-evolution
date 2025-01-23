@@ -6,13 +6,14 @@ interface ScheduleItemProps {
   name: string
   time: string
   type: string
-  status: "upcoming" | "confirmed"
+  status: string
 }
 
 export function ScheduleItem({ name, time, type, status }: ScheduleItemProps) {
-  const statusColors = {
+  const statusColors: Record<string, string> = {
+    pending: "bg-amber-100 text-amber-100",
     upcoming: "bg-blue-100 text-blue-800",
-    confirmed: "bg-green-100 text-green-800"
+    completed: "bg-green-100 text-green-800"
   }
 
   return (
@@ -30,9 +31,10 @@ export function ScheduleItem({ name, time, type, status }: ScheduleItemProps) {
         <Badge variant="secondary" className={statusColors[status]}>
           {status.charAt(0).toUpperCase() + status.slice(1)}
         </Badge>
-        <Button variant="outline" size="sm" className="bg-blue-500 text-white">
-          Join Meet
-        </Button>
+        {status == "upcoming" &&
+          <Button variant="outline" size="sm" className="bg-blue-500 text-white">
+            Join Meet
+          </Button>}
       </div>
     </div>
   )

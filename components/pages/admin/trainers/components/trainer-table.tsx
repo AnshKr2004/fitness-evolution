@@ -16,7 +16,7 @@ interface Trainer {
   email: string
   specialization: string
   rating: number | null
-  clientsCount: number
+  clients: Array<Trainer>
   status: "ACTIVE" | "INACTIVE"
 }
 
@@ -227,7 +227,7 @@ export function TrainerTable() {
                       {(trainer.rating ?? 0).toFixed(1)}
                     </div>
                   </TableCell>
-                  <TableCell>{trainer.clientsCount}</TableCell>
+                  <TableCell>{trainer.clients?.length}</TableCell>
                   <TableCell>
                     <span
                       className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${

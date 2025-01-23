@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Schedule } from "@/types/schedule"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -15,16 +15,39 @@ interface EditScheduleModalProps {
 }
 
 export function EditScheduleModal({ schedule, isOpen, onClose, onSave }: EditScheduleModalProps) {
-    const [date, setDate] = useState(schedule?.date ? new Date(schedule.date).toISOString().split('T')[0] : '')
-    const [startTime, setStartTime] = useState(schedule?.startTime ? new Date(schedule.startTime).toISOString().split('T')[1].slice(0, 5) : '')
-    const [endTime, setEndTime] = useState(schedule?.endTime ? new Date(schedule.endTime).toISOString().split('T')[1].slice(0, 5) : '')
+    const [date, setDate] = useState('')
+    const [startTime, setStartTime] = useState('')
+    const [endTime, setEndTime] = useState('')
+
+    useEffect(() => {
+        if (schedule) {
+            const scheduleDate = new Date(schedule.date)
+            setDate(scheduleDate.toISOString().split('T')[0])
+
+            const startDateTime = new Date(schedule.startTime)
+            setStartTime(startDateTime.toTimeString().slice(0, 5))
+
+            const endDateTime = new Date(schedule.endTime)
+            setEndTime(endDateTime.toTimeString().slice(0, 5))
+        }
+    }, [schedule])
 
     const handleSave = () => {
-        onSave({
-            date: new Date(date),
-            startTime: new Date(`${date}T${startTime}`),
-            endTime: new Date(`${date}T${endTime}`),
-        })
+        if (schedule) {
+            const updatedStartTime = new Date(schedule.startTime)
+            const [startHours, startMinutes] = startTime.split(':')
+            updatedStartTime.setHours(parseInt(startHours, 10), parseInt(startMinutes, 10))
+
+            const updatedEndTime = new Date(schedule.endTime)
+            const [endHours, endMinutes] = endTime.split(':')
+            updatedEndTime.setHours(parseInt(endHours, 10), parseInt(endMinutes, 10))
+
+            onSave({
+                date: new Date(date),
+                startTime: updatedStartTime,
+                endTime: updatedEndTime,
+            })
+        }
         onClose()
     }
 

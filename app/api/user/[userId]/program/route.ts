@@ -5,7 +5,13 @@ import { type NextRequest, NextResponse } from "next/server"
 
 const prisma = new PrismaClient()
 
-export async function PUT(request: NextRequest, { params }: { params: { userId: string } }) {
+type RouteContext = {
+    params: Promise<{
+        userId: string
+    }>
+  }
+
+export async function PUT(request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -13,7 +19,7 @@ export async function PUT(request: NextRequest, { params }: { params: { userId: 
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }
 
-    const { userId } = params
+    const { userId } = await context.params
     const { currentProgress, notes } = await request.json()
 
     let status: "IN_PROGRESS" | "NEAR_COMPLETE" | "COMPLETED"

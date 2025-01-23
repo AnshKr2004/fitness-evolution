@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
 import { Schedule } from "@/types/schedule"
 import { useSession } from 'next-auth/react'
+import { formatTime } from '@/lib/helper'
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -41,7 +42,7 @@ export function TodaysSchedule({ onEdit, onDelete }: TodaysScheduleProps) {
             <div className="space-y-1 min-w-0 flex-1">
               <h3 className="font-medium truncate">{item.scheduleSubject}</h3>
               <p className="text-xs md:text-sm text-muted-foreground">
-                {new Date(item.startTime).toLocaleTimeString()} - {new Date(item.endTime).toLocaleTimeString()}
+                {formatTime(item.startTime)} - {formatTime(item.endTime)}
               </p>
             </div>
             <div className="flex gap-1 md:gap-2 ml-2">

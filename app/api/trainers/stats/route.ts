@@ -24,6 +24,7 @@ export async function GET() {
           name: true,
           sessions: true,
           status: true,
+          clients: true,
         },
       }),
     ]);
@@ -35,7 +36,7 @@ export async function GET() {
     const avgRating = totalTrainers > 0 ? totalRating / totalTrainers : 0;
 
     const totalClients = trainers.reduce(
-      (sum, trainer) => sum + (trainer.clientsCount ?? 0),
+      (sum, trainer) => sum + (trainer.clients.length ?? 0),
       0
     );
 

@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
           email: true,
           specialization: true,
           rating: true,
-          clientsCount: true,
+          clients: true,
           status: true,
         },
         skip,

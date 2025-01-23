@@ -27,7 +27,7 @@ export default function TrainerDashboard() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await fetch("/api/users/clients")
+      const response = await fetch("/api/users/client")
       const data = await response.json()
       setUsers(data)
     }
@@ -92,7 +92,7 @@ export default function TrainerDashboard() {
                     name={schedule.user.name}
                     time={formatTime(schedule.startTime)}
                     type={schedule.scheduleSubject}
-                    status="upcoming"
+                    status={schedule.status}
                   />
                 ))
               ) : (
