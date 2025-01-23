@@ -1,7 +1,12 @@
+'use client'
 import { BarChart3, Users, IndianRupee } from 'lucide-react'
 import { UnifiedStatCard } from "@/components/pages/components/unified-stat-card"
+import { useTrainerContext } from '@/context/trainer'
 
 export function MetricCards() {
+  const {
+    userStats: { activeUsers},
+  } = useTrainerContext()
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       <UnifiedStatCard
@@ -13,7 +18,7 @@ export function MetricCards() {
       />
       <UnifiedStatCard
         title="Active Users"
-        value="1,234"
+        value={activeUsers.toString() || "0"}
         icon={Users}
         className="bg-blue-600 text-white"
       />

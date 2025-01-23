@@ -22,7 +22,19 @@ export async function GET() {
         bio: true,
         emailNotifications: true,
         smsNotifications: true,
-        clientsCount: true,
+        clients: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            program: {
+              select: {
+                currentProgress: true,
+                status: true,
+              },
+            },
+          },
+        },
       },
     })
 

@@ -22,8 +22,15 @@ export interface Trainer {
   id: string;
   name: string;
   email: string;
-  clientsCount: number;
-  trainerSchedules:[]
+  trainerSchedules: [];
+  clients: {
+    id: string;
+    name: string;
+    program?: {
+      currentProgress: number;
+      status: string;
+    };
+  }[];
   sessions: [];
 }
 
@@ -47,7 +54,6 @@ export interface SessionsStats {
   pendingSessions: number;
   completionRate: number;
 }
-
 
 interface ScheduleTrainer {
   name: string;

@@ -21,7 +21,7 @@ interface User {
 
 export default function TrainerDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { trainer, todaySchedule } = useTrainerContext()
+  const { trainer, todaySchedule, activePrograms } = useTrainerContext()
   const [users, setUsers] = useState<User[]>([])
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
@@ -66,8 +66,8 @@ export default function TrainerDashboard() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Stats Grid */}
         <div className="grid gap-4 md:grid-cols-3">
-          <StatCard title="Total Clients" value={trainer?.clientsCount || 0} type="clients" />
-          <StatCard title="Active Programs" value={8} type="programs" />
+          <StatCard title="Total Clients" value={trainer?.clients?.length || 0} type="clients" />
+          <StatCard title="Active Programs" value={activePrograms} type="programs" />
           <StatCard title="Sessions Today" value={todaySchedule.length} type="sessions" />
         </div>
 
@@ -85,8 +85,8 @@ export default function TrainerDashboard() {
           <div className="bg-white rounded-lg shadow">
             <h2 className="p-4 font-medium border-b">Today&apos;s Schedule</h2>
             <div>
-              {todaySchedule.length > 0 ? (
-                todaySchedule.map((schedule) => (
+              {todaySchedule?.length > 0 ? (
+                todaySchedule?.map((schedule) => (
                   <ScheduleItem
                     key={schedule.id}
                     name={schedule.user.name}
@@ -105,7 +105,7 @@ export default function TrainerDashboard() {
           <div className="bg-white rounded-lg shadow">
             <h2 className="p-4 font-medium border-b">Client Progress Updates</h2>
             <div>
-              {users.map((user) => (
+              {users?.map((user) => (
                 <ProgressItem
                   key={user.id}
                   userId={user.id}

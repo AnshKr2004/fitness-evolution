@@ -121,7 +121,7 @@ export function AddClassModal({ isOpen, onClose, onSave, users }: AddClassModalP
                 <SelectValue placeholder="Select a user" />
               </SelectTrigger>
               <SelectContent>
-                {users.map((user) => (
+                {users?.map((user) => (
                   <SelectItem key={user.id} value={user.id}>
                     {user.name}
                   </SelectItem>
