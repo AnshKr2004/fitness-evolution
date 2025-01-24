@@ -7,9 +7,9 @@ export default function Analytics() {
   return (
     <div className="space-y-6 p-6 lg:ml-64">
       <MetricCards />
-      <div className="grid gap-6 md:grid-cols-2">
+      <div>
         <CommunityPosts />
-        <EngagementAnalytics />
+        {/* <EngagementAnalytics /> */}
       </div>
       <RecentActivity />
     </div>

@@ -1,42 +1,38 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+"use client"
+
+import { useEffect, useState } from "react"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { client } from "@/sanity/lib/client"
+import { formatDistanceToNow } from "date-fns"
 
 interface Activity {
+  _id: string
   member: string
   activity: string
   post: string
-  time: string
+  createdAt: string
 }
 
-const activities: Activity[] = [
-  {
-    member: "John Doe",
-    activity: "Commented",
-    post: "Morning Workout Tips",
-    time: "5 mins ago",
-  },
-  {
-    member: "Sarah Smith",
-    activity: "Liked",
-    post: "New HIIT Class Schedule",
-    time: "15 mins ago",
-  },
-  {
-    member: "Mike Johnson",
-    activity: "Posted",
-    post: "Nutrition Guide",
-    time: "1 hour ago",
-  },
-]
-
 export function RecentActivity() {
+  const [activities, setActivities] = useState<Activity[]>([])
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      const query = `*[_type == "activity"] | order(createdAt desc)[0...5] {
+        _id,
+        member,
+        activity,
+        post,
+        createdAt
+      }`
+      const result = await client.fetch<Activity[]>(query)
+      setActivities(result)
+    }
+
+    fetchActivities()
+  }, [])
+
   return (
     <Card>
       <CardHeader>
@@ -53,12 +49,14 @@ export function RecentActivity() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {activities.map((activity, i) => (
-              <TableRow key={i}>
+            {activities.map((activity) => (
+              <TableRow key={activity._id}>
                 <TableCell>{activity.member}</TableCell>
                 <TableCell>{activity.activity}</TableCell>
                 <TableCell>{activity.post}</TableCell>
-                <TableCell className="text-right">{activity.time}</TableCell>
+                <TableCell className="text-right">
+                  {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

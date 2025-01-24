@@ -57,6 +57,7 @@ export default function DashboardPage() {
           <UnifiedStatCard key={metric.title} {...metric} />
         ))}
       </div> */}
+      <p className="text-2xl"><strong>Chat Monitoring System</strong></p>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
