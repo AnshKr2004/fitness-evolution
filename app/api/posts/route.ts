@@ -4,6 +4,17 @@ import { client as sanityClient } from "@/sanity/lib/client"
 
 const prisma = new PrismaClient()
 
+interface SanityPost {
+  _id: string
+  title: string
+  author: {
+    name: string
+    image: string
+  }
+  body: any[] // Sanity block content type
+  publishedAt: string
+}
+
 export async function GET() {
   const query = `*[_type == "blog"] | order(publishedAt desc) {
     _id,
@@ -12,10 +23,10 @@ export async function GET() {
     body,
     publishedAt
   }`
-  const posts = await sanityClient.fetch(query)
+  const posts: SanityPost[] = await sanityClient.fetch(query)
 
   const postsWithLikes = await Promise.all(
-    posts.map(async (post: any) => ({
+    posts.map(async (post: SanityPost) => ({
       ...post,
       likes: await prisma.like.count({
         where: { postId: post._id },
