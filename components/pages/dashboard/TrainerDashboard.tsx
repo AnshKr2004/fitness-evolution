@@ -93,6 +93,7 @@ export default function TrainerDashboard() {
                     time={formatTime(schedule.startTime)}
                     type={schedule.scheduleSubject}
                     status={schedule.status}
+                    link={schedule.scheduleLink}
                   />
                 ))
               ) : (

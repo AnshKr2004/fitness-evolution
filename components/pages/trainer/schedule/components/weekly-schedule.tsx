@@ -86,6 +86,7 @@ export function WeeklySchedule({ onAddClass, onExport }: WeeklyScheduleProps) {
             <p><strong>Date:</strong> {selectedSchedule?.date ? new Date(selectedSchedule.date).toLocaleDateString() : 'N/A'}</p>
             <p><strong>Time:</strong> {selectedSchedule ? `${formatTime(selectedSchedule.startTime)} - ${formatTime(selectedSchedule.endTime)}` : 'N/A'}</p>
             <p><strong>User:</strong> {selectedSchedule?.user?.name || 'N/A'}</p>
+            <p><strong>Status:</strong> {selectedSchedule?.status}</p>
           </div>
           <DialogFooter>
             <Button onClick={() => setSelectedSchedule(null)}>Close</Button>
