@@ -41,6 +41,7 @@ export default function SignUp() {
         const result = await signIn("credentials", {
           email: formData.email,
           password: formData.password,
+          redirect: true,
         })
 
         if (result?.error) {
