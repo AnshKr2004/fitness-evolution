@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { useState } from "react"
 import { signIn } from "next-auth/react"
@@ -20,7 +20,7 @@ export default function SignIn() {
       const result = await signIn("credentials", {
         email: formData.email,
         password: formData.password,
-        redirect: true,
+        redirect: false,
       })
 
       if (result?.error) {
@@ -35,7 +35,7 @@ export default function SignIn() {
   }
 
   const handleSocialSignIn = (provider: string) => {
-    signIn(provider, { callbackUrl: '/dashboard' })
+    signIn(provider, { callbackUrl: "/dashboard" })
   }
 
   return (
@@ -71,10 +71,7 @@ export default function SignIn() {
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
-          <button
-            type="submit"
-            className="w-full p-3 rounded bg-blue-600 hover:bg-blue-700 transition-colors"
-          >
+          <button type="submit" className="w-full p-3 rounded bg-blue-600 hover:bg-blue-700 transition-colors">
             Sign In
           </button>
 

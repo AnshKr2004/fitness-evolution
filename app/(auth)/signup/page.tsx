@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { useState } from "react"
 import { signIn } from "next-auth/react"
@@ -11,13 +11,13 @@ export default function SignUp() {
     name: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   })
   const [error, setError] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match")
       return
@@ -27,13 +27,13 @@ export default function SignUp() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
-          password: formData.password
-        })
+          password: formData.password,
+        }),
       })
 
       if (res.ok) {
@@ -41,7 +41,7 @@ export default function SignUp() {
         const result = await signIn("credentials", {
           email: formData.email,
           password: formData.password,
-          redirect: true,
+          redirect: false,
         })
 
         if (result?.error) {
@@ -49,6 +49,9 @@ export default function SignUp() {
         } else {
           router.push("/dashboard")
         }
+      } else {
+        const data = await res.json()
+        setError(data.message || "An error occurred during registration")
       }
     } catch (error) {
       console.error(error)
@@ -57,7 +60,7 @@ export default function SignUp() {
   }
 
   const handleSocialSignUp = (provider: string) => {
-    signIn(provider, { callbackUrl: '/dashboard' })
+    signIn(provider, { callbackUrl: "/dashboard" })
   }
 
   return (
@@ -65,7 +68,7 @@ export default function SignUp() {
       <div className="w-full max-w-md p-8 rounded-lg bg-[#12143a] text-white">
         <h1 className="text-2xl font-bold text-center mb-2">Create Account</h1>
         <p className="text-center text-gray-400 mb-6">Sign up for your new account</p>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm mb-2">Full Name</label>
@@ -117,10 +120,7 @@ export default function SignUp() {
 
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
-          <button
-            type="submit"
-            className="w-full p-3 rounded bg-blue-600 hover:bg-blue-700 transition-colors"
-          >
+          <button type="submit" className="w-full p-3 rounded bg-blue-600 hover:bg-blue-700 transition-colors">
             Sign Up
           </button>
 
