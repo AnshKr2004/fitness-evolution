@@ -23,7 +23,7 @@ const trainerNavigation = [
   { name: "Schedule", href: "/trainer/schedule", icon: Calendar },
   { name: "Chats", href: "/trainer/chats", icon: MessageSquare },
   { name: "Settings", href: "/trainer/settings", icon: Settings },
-  { name: "Help", href: "/trainer/help", icon: HelpCircle },
+  { name: "Help", href: "", icon: HelpCircle },
 ]
 
 export function Sidebar() {
