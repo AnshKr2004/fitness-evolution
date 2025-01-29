@@ -16,7 +16,7 @@ model User {
   password           String?
   emailVerified      DateTime?
   image              String?
-  role               Role            @default(USER)
+  role               Role            @default(TRAINER)
   name               String?
   gender             Gender?
   birthDate          DateTime?

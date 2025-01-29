@@ -15,7 +15,9 @@ export async function GET(request: NextRequest) {
     const upcomingSchedules = await prisma.schedule.findMany({
       where: {
         userId: decoded.id,
-        status: "upcoming",
+        status: {
+          in: ["upcoming", "waitingToApprove"],
+        },
         date: {
           gte: new Date(),
         },
@@ -26,6 +28,7 @@ export async function GET(request: NextRequest) {
         startTime: true,
         scheduleLink: true,
         scheduleSubject: true,
+        status: true,
         trainer: {
           select: {
             name: true,
